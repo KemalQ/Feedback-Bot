@@ -23,6 +23,15 @@ CREATE TABLE feedback_message (
     created_at      TIMESTAMP    NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE invite_token (
+    id         BIGSERIAL PRIMARY KEY,
+    token      VARCHAR(64)  NOT NULL UNIQUE,
+    branch     VARCHAR(255) NOT NULL,
+    is_active  BOOLEAN      NOT NULL DEFAULT TRUE,
+    expires_at TIMESTAMP,
+    created_at TIMESTAMP    NOT NULL DEFAULT NOW()
+);
+
 CREATE INDEX idx_feedback_user_id   ON feedback_message(user_id);
 CREATE INDEX idx_feedback_criticality ON feedback_message(criticality);
 CREATE INDEX idx_feedback_created_at  ON feedback_message(created_at DESC);

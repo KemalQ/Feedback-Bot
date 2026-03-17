@@ -1,4 +1,4 @@
-package com.feedbackbot.javabot.dao;
+package com.feedbackbot.dao;
 
 import com.feedbackbot.javabot.entity.FeedbackMessage;
 import org.springframework.data.domain.Page;
