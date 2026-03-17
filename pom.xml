@@ -24,7 +24,9 @@
 	<modules>
 		<module>common-jpa</module>
         <module>node</module>
-    </modules>
+		<module>dispatcher</module>
+		<module>rest-service</module>
+	</modules>
 	<scm>
 		<connection/>
 		<developerConnection/>
