@@ -1,5 +1,6 @@
 package com.feedbackbot.entity;
 
+import com.feedbackbot.enums.Sentiment;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -28,7 +29,7 @@ public class FeedbackMessage {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "sentiment")
-    private Enum sentiment;
+    private Sentiment sentiment;
 
     // 1 = min, 5 = critical
     @Column(name = "criticality")
