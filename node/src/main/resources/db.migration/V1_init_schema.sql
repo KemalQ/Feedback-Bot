@@ -1,0 +1,28 @@
+CREATE TABLE app_user (
+    id               BIGSERIAL PRIMARY KEY,
+    telegram_user_id BIGINT       NOT NULL UNIQUE,
+    username         VARCHAR(255),
+    first_name       VARCHAR(255),
+    last_name        VARCHAR(255),
+    role             VARCHAR(50),
+    branch           VARCHAR(255),
+    state            VARCHAR(50)  NOT NULL DEFAULT 'NEW',
+    created_at       TIMESTAMP    NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE feedback_message (
+    id              BIGSERIAL PRIMARY KEY,
+    user_id         BIGINT       NOT NULL REFERENCES app_user(id),
+    text            TEXT         NOT NULL,
+    sentiment       VARCHAR(20),
+    criticality     INTEGER      CHECK (criticality BETWEEN 1 AND 5),
+    resolution      TEXT,
+    google_doc_row_id VARCHAR(255),
+    trello_card_id  VARCHAR(255),
+    is_processed    BOOLEAN      NOT NULL DEFAULT FALSE,
+    created_at      TIMESTAMP    NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_feedback_user_id   ON feedback_message(user_id);
+CREATE INDEX idx_feedback_criticality ON feedback_message(criticality);
+CREATE INDEX idx_feedback_created_at  ON feedback_message(created_at DESC);
