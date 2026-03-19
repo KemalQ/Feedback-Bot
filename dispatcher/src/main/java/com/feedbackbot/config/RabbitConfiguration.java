@@ -10,8 +10,6 @@ import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import static com.feedbackbot.module.RabbitQueue.TEXT_MESSAGE_UPDATE;
-
 @Slf4j
 @Configuration
 public class RabbitConfiguration {

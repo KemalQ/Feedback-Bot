@@ -16,6 +16,7 @@
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
+        <telegrambots-meta-version>9.5.0</telegrambots-meta-version>
     </properties>
 
     <dependencies>
@@ -38,7 +39,7 @@
         <dependency>
             <groupId>org.telegram</groupId>
             <artifactId>telegrambots-meta</artifactId>
-            <version>9.5.0</version>
+            <version>${telegrambots-meta-version}</version>
         </dependency>
 
         <dependency>

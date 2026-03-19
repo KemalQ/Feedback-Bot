@@ -75,7 +75,7 @@ public class UpdateProcessor {
         /// Sending to direct queue
         CorrelationData correlationData = createCorrelationData();
         rabbitTemplate.convertAndSend(DIRECT_EXCHANGE, TEXT_ROUTE,
-                update.getMessage().getText(),
+                update,
                 correlationData);
     }
 
