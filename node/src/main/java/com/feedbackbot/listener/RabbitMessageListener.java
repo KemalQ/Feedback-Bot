@@ -20,10 +20,16 @@ public class RabbitMessageListener {
     @RabbitListener(queues = TEXT_MESSAGE_UPDATE)
     public void consumeUpdate(Update update) {
         try {
+
+            if (update.hasCallbackQuery()){
+                messagingApplicationService.handleCallback(update);
+                return;
+            }
+
             messagingApplicationService.handleUpdate(update);
         } catch (IllegalArgumentException e) {
             log.error("❌ Failed to process notification: {}", update.getMessage().getText(), e);
-            // *
+
             throw new AmqpRejectAndDontRequeueException("Invalid message payload", e);
         }
     }

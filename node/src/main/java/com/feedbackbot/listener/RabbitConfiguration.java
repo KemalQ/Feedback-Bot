@@ -13,20 +13,11 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RabbitConfiguration {
-    // for customizing the message converter(used for Instant field in UserEventDTO)
     @Bean
     public Jackson2JsonMessageConverter messageConverter(ObjectMapper objectMapper) {
         return new Jackson2JsonMessageConverter(objectMapper);
     }
 
-//  or you can use the default message converter
-//    @Bean
-//    public Jackson2JsonMessageConverter messageConverter(ObjectMapper objectMapper) {// for customizing the message converter
-//        return new Jackson2JsonMessageConverter(objectMapper);
-//    }
-
-    // for creating ObjectMapper
-    // You can delete this bean and import spring-boot-starter-web to pom.xml
     @Bean
     public ObjectMapper objectMapper() {
         ObjectMapper mapper = new ObjectMapper();

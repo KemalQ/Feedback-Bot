@@ -19,7 +19,6 @@ public class TelegramBot {
     }
 
     public void sendAnswerMessage(SendMessage message) {
-
         try {
             telegramClient.execute(message);
         } catch (TelegramApiException e) {
