@@ -3,6 +3,7 @@ package com.feedbackbot.listener;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
@@ -18,11 +19,16 @@ public class RabbitMessageListener {
     }
 
     @RabbitListener(queues = TEXT_MESSAGE_UPDATE)
-    public void consumeUpdate(Update update) {
+    public void consumeUpdate(Update update,
+                              @Header(value = "invite_token", required = false) String inviteToken) {
         try {
 
             if (update.hasCallbackQuery()){
                 messagingApplicationService.handleCallback(update);
+                return;
+            }
+            if (inviteToken != null && !inviteToken.isBlank()){
+                messagingApplicationService.handleStartWithToken(update, inviteToken);
                 return;
             }
 

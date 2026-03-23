@@ -6,7 +6,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
-import static com.feedbackbot.module.RabbitQueue.ANSWER_MESSAGE;
+import static com.feedbackbot.module.RabbitQueue.*;
 
 @Slf4j
 @Service
@@ -20,6 +20,6 @@ public class ProducerServiceImpl implements ProducerService {
     @Override
     public void produceAnswer(SendMessage message) {
         log.info("Sending answer to chat {}", message.getChatId());
-        template.convertAndSend(ANSWER_MESSAGE, message);
+        template.convertAndSend(DIRECT_EXCHANGE, ANSWER_ROUTE, message);
     }
 }

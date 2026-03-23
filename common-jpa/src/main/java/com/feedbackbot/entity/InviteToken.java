@@ -1,5 +1,6 @@
 package com.feedbackbot.entity;
 
+import com.feedbackbot.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -31,4 +32,14 @@ public class InviteToken {
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false)
+    private UserRole role;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean used = false;
 }
+
+

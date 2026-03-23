@@ -1,5 +1,5 @@
-FROM ubuntu:latest
+FROM ghcr.io/graalvm/graalvm-community:21
 LABEL authors="SHERFEDINOV KEMAL"
 WORKDIR /app
-COPY dispatcher/target/dispatcher-0.0.1.jar app.jar
+COPY target/dispatcher-0.0.1-SNAPSHOT.jar app.jar
 ENTRYPOINT ["java", "-jar", "app.jar"]

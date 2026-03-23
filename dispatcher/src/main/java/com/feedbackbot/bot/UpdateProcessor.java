@@ -32,16 +32,32 @@ public class UpdateProcessor {
             log.error("Received update is null");
             return;
         }
-        if (update.hasMessage() && update.getMessage().hasText()) {
+
+        if (update.hasCallbackQuery()){
+            processCallBackQuery(update);
+        }
+        else if (update.hasMessage() && update.getMessage().hasText()) {
             distributeMessageByType(update);
 
             // TODO -Static answer, change after webhook test
-            telegramBot.sendAnswerMessage(messageUtils.generateSendMessageWithText(update, "answer"));
+//            telegramBot.sendAnswerMessage(messageUtils.generateSendMessageWithText(update, "answer"));
         }
         else {
-            log.error("Unsupported message type is:  {}" , update);
+            log.warn("Unsupported message type is:  {}" , update);
         }
     }
+
+    private void processCallBackQuery(Update update) {
+        String callBackData = update.getCallbackQuery().getData();
+        log.info("Callback received: {}", callBackData);
+
+        rabbitTemplate.convertAndSend(
+                DIRECT_EXCHANGE,
+                TEXT_ROUTE,
+                update,
+                createCorrelationData());
+    }
+
     private void distributeMessageByType(Update update){
         var message = update.getMessage();
 
@@ -70,15 +86,33 @@ public class UpdateProcessor {
 
     private void processTextMessage(Update update) {
         String text = update.getMessage().getText();
-        String chatId = update.getMessage().getChatId().toString();
-        
-        /// Sending to direct queue
-        CorrelationData correlationData = createCorrelationData();
-        rabbitTemplate.convertAndSend(DIRECT_EXCHANGE, TEXT_ROUTE,
-                update,
-                correlationData);
-    }
 
+        //message with token
+        if (text.startsWith("/start ")){
+            String token = text.substring(7).trim();
+            log.info("Start with token: {}", token);
+
+            rabbitTemplate.convertAndSend(
+                    DIRECT_EXCHANGE,
+                    TEXT_ROUTE,
+                    update,
+                    message -> {
+                        message.getMessageProperties().setHeader("invite_token", token);
+                        return message;
+                    },
+                    createCorrelationData()
+            );
+            return;
+        }
+
+        /// Sending to direct queue
+        //base text message
+        rabbitTemplate.convertAndSend(
+                DIRECT_EXCHANGE,
+                TEXT_ROUTE,
+                update,
+                createCorrelationData());
+    }
 
     private CorrelationData createCorrelationData() {
         return new CorrelationData(UUID.randomUUID().toString());

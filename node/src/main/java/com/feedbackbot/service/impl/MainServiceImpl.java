@@ -85,7 +85,7 @@ public class MainServiceImpl implements MainService {
             return "Please use the invite link to get started.";
         }
 
-        // /start without token — обычный /start
+        ///start without token — base /start
         return "Welcome! Please use the invite link provided by your manager to register.";
     }
 

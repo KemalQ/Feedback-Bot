@@ -36,4 +36,10 @@ public class MessagingApplicationService {
         log.info("🔘 Callback received: {}", callbackData);
         mainService.processCallback(update, callbackData);
     }
+
+    public void handleStartWithToken(Update update, String inviteToken) {
+        messageValidator.validateUpdate(update);
+        log.info("Start with token {}", inviteToken);
+        mainService.processStartWithToken(update, inviteToken);
+    }
 }
