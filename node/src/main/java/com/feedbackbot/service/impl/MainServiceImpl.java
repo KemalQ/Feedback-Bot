@@ -1,13 +1,17 @@
 package com.feedbackbot.service.impl;
 
 import com.feedbackbot.dao.AppUserDAO;
+import com.feedbackbot.dao.FeedbackMessageDAO;
 import com.feedbackbot.dao.InviteTokenDAO;
 import com.feedbackbot.dao.RawDataDAO;
+import com.feedbackbot.dto.FeedbackAnalysisResult;
 import com.feedbackbot.entity.AppUser;
+import com.feedbackbot.entity.FeedbackMessage;
 import com.feedbackbot.entity.InviteToken;
 import com.feedbackbot.entity.RawData;
 import com.feedbackbot.enums.ServiceCommand;
 import com.feedbackbot.enums.UserRole;
+import com.feedbackbot.service.ClaudeAnalysisService;
 import com.feedbackbot.service.MainService;
 import com.feedbackbot.service.ProducerService;
 import lombok.extern.slf4j.Slf4j;
@@ -36,13 +40,18 @@ public class MainServiceImpl implements MainService {
     private final InviteTokenDAO inviteTokenDAO;
     private final ProducerService producerService;
     private final AppUserDAO appUserDAO;
+    private final ClaudeAnalysisService claudeAnalysisService;
+    private final FeedbackMessageDAO feedbackMessageDAO;
 
-    public MainServiceImpl(RawDataDAO rawDataDAO, InviteTokenDAO inviteTokenDAO, ProducerService producerService, AppUserDAO appUserDAO) {
+    public MainServiceImpl(RawDataDAO rawDataDAO, InviteTokenDAO inviteTokenDAO, ProducerService producerService, AppUserDAO appUserDAO, ClaudeAnalysisService claudeAnalysisService, FeedbackMessageDAO feedbackMessageDAO) {
         this.rawDataDAO = rawDataDAO;
         this.inviteTokenDAO = inviteTokenDAO;
         this.producerService = producerService;
         this.appUserDAO = appUserDAO;
+        this.claudeAnalysisService = claudeAnalysisService;
+        this.feedbackMessageDAO = feedbackMessageDAO;
     }
+
 
     @Override
     public void processTextMessage(Update update) {
@@ -174,7 +183,46 @@ public class MainServiceImpl implements MainService {
 
         log.info("Feedback received from user {}: {} chars", appUser.getTelegramUserId(), text.length());
 
-        return "Your feedback has been received and will be reviewed anonymously. Thank you!";
+        FeedbackAnalysisResult analysis = claudeAnalysisService.analyze(text);
+
+        FeedbackMessage feedback = FeedbackMessage.builder()
+                .user(appUser)
+                .text(text)
+                .sentiment(analysis.getSentiment())
+                .criticality(analysis.getCriticality())
+                .resolution(analysis.getResolution())
+                .isProcessed(false)
+                .build();
+
+        feedbackMessageDAO.save(feedback);
+        log.info("Feedback saved: id={}, criticality={}",
+                feedback.getId(), feedback.getCriticality());
+
+        // Ответ пользователю
+        return buildUserResponse(analysis);
+    }
+
+    private String buildUserResponse(FeedbackAnalysisResult analysis) {
+        String emoji = switch (analysis.getSentiment()){
+            case POSITIVE -> "😊";
+            case NEUTRAL  -> "📝";
+            case NEGATIVE -> "⚠️";
+        };
+
+        String urgency = analysis.getCriticality() >= 4
+                ? "\n🚨 This issue has been flagged as high priority."
+                : "";
+
+        return String.format(
+                "%s Your feedback has been received and logged anonymously.\n\n" +
+                        "Assessment: %s | Priority: %d/5\n" +
+                        "Suggested action: %s%s",
+                emoji,
+                analysis.getSentiment().toString().toLowerCase(),
+                analysis.getCriticality(),
+                analysis.getResolution(),
+                urgency
+        );
     }
 
 

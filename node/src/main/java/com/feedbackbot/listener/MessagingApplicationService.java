@@ -33,7 +33,7 @@ public class MessagingApplicationService {
 
         update.getMessage();
 
-        log.info("🔘 Callback received: {}", callbackData);
+        log.info("Callback received: {}", callbackData);
         mainService.processCallback(update, callbackData);
     }
 
