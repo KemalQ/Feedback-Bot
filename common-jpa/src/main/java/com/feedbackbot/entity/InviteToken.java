@@ -24,7 +24,7 @@ public class InviteToken {
 
     @Column(nullable = false)
     @Builder.Default
-    private Boolean isActive = true;
+    private boolean isActive = true;
 
     @Column(name = "expires_at")
     private LocalDateTime expiresAt;

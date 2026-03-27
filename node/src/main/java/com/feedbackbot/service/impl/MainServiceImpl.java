@@ -115,6 +115,7 @@ public class MainServiceImpl implements MainService {
         Optional<InviteToken> inviteOpt = inviteTokenDAO.findByTokenAndIsActiveTrue(token);
 
         if (inviteOpt.isEmpty()) {
+            System.out.println("TOKEN FROM USER: [" + token + "]");
             sendAnswer("This invite link is invalid or has expired. Contact your manager.", chatId);
             return;
         }
@@ -200,6 +201,7 @@ public class MainServiceImpl implements MainService {
 
         // Ответ пользователю
         return buildUserResponse(analysis);
+
     }
 
     private String buildUserResponse(FeedbackAnalysisResult analysis) {

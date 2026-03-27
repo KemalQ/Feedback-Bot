@@ -17,6 +17,11 @@ import java.util.Map;
 @Slf4j
 @Service
 public class ClaudeAnalysisServiceImpl implements ClaudeAnalysisService {
+    private String apiKey;
+
+    @Value("${claude.model}")
+    private String model;
+
     private final RestClient restClient;
     private final ObjectMapper objectMapper;
 
@@ -25,11 +30,6 @@ public class ClaudeAnalysisServiceImpl implements ClaudeAnalysisService {
         this.objectMapper = objectMapper;
     }
 
-    @Value("${spring.ai.anthropic.api-key}")
-    private String apiKey;
-
-    @Value("${spring.ai.anthropic.chat.options.model}")
-    private String model;
 
     @Override
     public FeedbackAnalysisResult analyze(String feedbackText) {
@@ -44,9 +44,6 @@ public class ClaudeAnalysisServiceImpl implements ClaudeAnalysisService {
         );
         try {
             String response = restClient.post()
-                    .uri("https://api.anthropic.com/v1/messages")
-                    .header("x-api-key", apiKey)
-                    .header("anthropic-version", "2023-06-01")
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(requestBody)
                     .retrieve()
@@ -68,16 +65,16 @@ public class ClaudeAnalysisServiceImpl implements ClaudeAnalysisService {
     private String buildPrompt(String feedbackText) {
         return """
                 Analyze the following employee feedback from an auto service company.
-                
+
                 Feedback: "%s"
-                
+
                 Respond ONLY with a valid JSON object, no explanation, no markdown:
                 {
                   "sentiment": "POSITIVE" or "NEUTRAL" or "NEGATIVE",
                   "criticality": <integer from 1 to 5>,
                   "resolution": "<short actionable suggestion in English, max 100 chars>"
                 }
-                
+
                 Criticality scale:
                 1 - minor suggestion
                 2 - low priority issue
