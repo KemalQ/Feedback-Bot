@@ -11,10 +11,7 @@ import com.feedbackbot.entity.InviteToken;
 import com.feedbackbot.entity.RawData;
 import com.feedbackbot.enums.ServiceCommand;
 import com.feedbackbot.enums.UserRole;
-import com.feedbackbot.service.ClaudeAnalysisService;
-import com.feedbackbot.service.GoogleSheetsService;
-import com.feedbackbot.service.MainService;
-import com.feedbackbot.service.ProducerService;
+import com.feedbackbot.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -41,16 +38,21 @@ public class MainServiceImpl implements MainService {
     private final InviteTokenDAO inviteTokenDAO;
     private final ProducerService producerService;
     private final AppUserDAO appUserDAO;
-    private final ClaudeAnalysisService claudeAnalysisService;
+    private final SpringAIAnalysisService springAIAnalysisService;
     private final FeedbackMessageDAO feedbackMessageDAO;
     private final GoogleSheetsService googleSheetsService;
 
-    public MainServiceImpl(RawDataDAO rawDataDAO, InviteTokenDAO inviteTokenDAO, ProducerService producerService, AppUserDAO appUserDAO, ClaudeAnalysisService claudeAnalysisService, FeedbackMessageDAO feedbackMessageDAO, GoogleSheetsService googleSheetsService) {
+    public MainServiceImpl(RawDataDAO rawDataDAO,
+                           InviteTokenDAO inviteTokenDAO,
+                           ProducerService producerService, AppUserDAO appUserDAO,
+                           SpringAIAnalysisService springAIAnalysisService,
+                           FeedbackMessageDAO feedbackMessageDAO,
+                           GoogleSheetsService googleSheetsService) {
         this.rawDataDAO = rawDataDAO;
         this.inviteTokenDAO = inviteTokenDAO;
         this.producerService = producerService;
         this.appUserDAO = appUserDAO;
-        this.claudeAnalysisService = claudeAnalysisService;
+        this.springAIAnalysisService = springAIAnalysisService;
         this.feedbackMessageDAO = feedbackMessageDAO;
         this.googleSheetsService = googleSheetsService;
     }
@@ -183,11 +185,9 @@ public class MainServiceImpl implements MainService {
             return "Feedback is too long (max 2000 characters). Please shorten it.";
         }
 
-        // TODO Sprint 2: send to queue for Claude analysis queue
-
         log.info("Feedback received from user {}: {} chars", appUser.getTelegramUserId(), text.length());
 
-        FeedbackAnalysisResult analysis = claudeAnalysisService.analyze(text);
+        FeedbackAnalysisResult analysis = springAIAnalysisService.analyze(text);
 
         FeedbackMessage feedback = FeedbackMessage.builder()
                 .user(appUser)
