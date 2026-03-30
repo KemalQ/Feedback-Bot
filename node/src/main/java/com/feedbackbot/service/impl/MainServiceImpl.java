@@ -12,6 +12,7 @@ import com.feedbackbot.entity.RawData;
 import com.feedbackbot.enums.ServiceCommand;
 import com.feedbackbot.enums.UserRole;
 import com.feedbackbot.service.ClaudeAnalysisService;
+import com.feedbackbot.service.GoogleSheetsService;
 import com.feedbackbot.service.MainService;
 import com.feedbackbot.service.ProducerService;
 import lombok.extern.slf4j.Slf4j;
@@ -42,14 +43,16 @@ public class MainServiceImpl implements MainService {
     private final AppUserDAO appUserDAO;
     private final ClaudeAnalysisService claudeAnalysisService;
     private final FeedbackMessageDAO feedbackMessageDAO;
+    private final GoogleSheetsService googleSheetsService;
 
-    public MainServiceImpl(RawDataDAO rawDataDAO, InviteTokenDAO inviteTokenDAO, ProducerService producerService, AppUserDAO appUserDAO, ClaudeAnalysisService claudeAnalysisService, FeedbackMessageDAO feedbackMessageDAO) {
+    public MainServiceImpl(RawDataDAO rawDataDAO, InviteTokenDAO inviteTokenDAO, ProducerService producerService, AppUserDAO appUserDAO, ClaudeAnalysisService claudeAnalysisService, FeedbackMessageDAO feedbackMessageDAO, GoogleSheetsService googleSheetsService) {
         this.rawDataDAO = rawDataDAO;
         this.inviteTokenDAO = inviteTokenDAO;
         this.producerService = producerService;
         this.appUserDAO = appUserDAO;
         this.claudeAnalysisService = claudeAnalysisService;
         this.feedbackMessageDAO = feedbackMessageDAO;
+        this.googleSheetsService = googleSheetsService;
     }
 
 
@@ -198,6 +201,8 @@ public class MainServiceImpl implements MainService {
         feedbackMessageDAO.save(feedback);
         log.info("Feedback saved: id={}, criticality={}",
                 feedback.getId(), feedback.getCriticality());
+
+        googleSheetsService.appendFeedbackRow(feedback, appUser);
 
         // Ответ пользователю
         return buildUserResponse(analysis);

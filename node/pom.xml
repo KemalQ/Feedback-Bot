@@ -59,6 +59,18 @@
             <scope>compile</scope>
         </dependency>
 
+        <!-- Google Sheets API -->
+        <dependency>
+            <groupId>com.google.apis</groupId>
+            <artifactId>google-api-services-sheets</artifactId>
+            <version>v4-rev20220927-2.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.auth</groupId>
+            <artifactId>google-auth-library-oauth2-http</artifactId>
+            <version>1.19.0</version>
+        </dependency>
+
         <dependency>
             <groupId>com.feedbackbot</groupId>
             <artifactId>common-jpa</artifactId>

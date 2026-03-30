@@ -45,6 +45,7 @@ public class ClaudeAnalysisServiceImpl implements ClaudeAnalysisService {
         try {
             String response = restClient.post()
                     .contentType(MediaType.APPLICATION_JSON)
+                    .header("anthropic-version", "2023-06-01")//TODO проверить с этой строкой
                     .body(requestBody)
                     .retrieve()
                     .body(String.class);
