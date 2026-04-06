@@ -13,6 +13,7 @@ import com.feedbackbot.enums.ServiceCommand;
 import com.feedbackbot.enums.UserRole;
 import com.feedbackbot.integrations.ai.SpringAIAnalysisService;
 import com.feedbackbot.integrations.sheets.GoogleSheetsService;
+import com.feedbackbot.integrations.trello.TrelloService;
 import com.feedbackbot.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -43,13 +44,14 @@ public class MainServiceImpl implements MainService {
     private final SpringAIAnalysisService springAIAnalysisService;
     private final FeedbackMessageDAO feedbackMessageDAO;
     private final GoogleSheetsService googleSheetsService;
+    private final TrelloService trelloService;
 
     public MainServiceImpl(RawDataDAO rawDataDAO,
                            InviteTokenDAO inviteTokenDAO,
                            ProducerService producerService, AppUserDAO appUserDAO,
                            SpringAIAnalysisService springAIAnalysisService,
                            FeedbackMessageDAO feedbackMessageDAO,
-                           GoogleSheetsService googleSheetsService) {
+                           GoogleSheetsService googleSheetsService, TrelloService trelloService) {
         this.rawDataDAO = rawDataDAO;
         this.inviteTokenDAO = inviteTokenDAO;
         this.producerService = producerService;
@@ -57,6 +59,7 @@ public class MainServiceImpl implements MainService {
         this.springAIAnalysisService = springAIAnalysisService;
         this.feedbackMessageDAO = feedbackMessageDAO;
         this.googleSheetsService = googleSheetsService;
+        this.trelloService = trelloService;
     }
 
 
@@ -205,6 +208,8 @@ public class MainServiceImpl implements MainService {
                 feedback.getId(), feedback.getCriticality());
 
         googleSheetsService.appendFeedbackRow(feedback, appUser);
+
+        trelloService.createCardIfCritical(feedback, appUser);
 
         // Ответ пользователю
         return buildUserResponse(analysis);
