@@ -1,8 +1,7 @@
-package com.feedbackbot.service.impl;
+package com.feedbackbot.integrations.sheets;
 
 import com.feedbackbot.entity.AppUser;
 import com.feedbackbot.entity.FeedbackMessage;
-import com.feedbackbot.service.GoogleSheetsService;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.model.ValueRange;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +19,7 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
     @Value("${google.sheets.spreadsheet-id}")
     private String spreadsheetId;
 
-    @Value("${google.sheets.range:Лист1!A:G}")
+    @Value("${google.sheets.range:A:G}")
     private String range;
 
     public GoogleSheetsServiceImpl(Sheets sheetsService) {

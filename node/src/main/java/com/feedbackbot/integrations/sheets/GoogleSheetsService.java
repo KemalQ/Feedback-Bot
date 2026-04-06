@@ -1,4 +1,4 @@
-package com.feedbackbot.service;
+package com.feedbackbot.integrations.sheets;
 
 import com.feedbackbot.entity.AppUser;
 import com.feedbackbot.entity.FeedbackMessage;

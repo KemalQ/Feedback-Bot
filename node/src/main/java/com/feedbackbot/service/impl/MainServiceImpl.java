@@ -11,6 +11,8 @@ import com.feedbackbot.entity.InviteToken;
 import com.feedbackbot.entity.RawData;
 import com.feedbackbot.enums.ServiceCommand;
 import com.feedbackbot.enums.UserRole;
+import com.feedbackbot.integrations.ai.SpringAIAnalysisService;
+import com.feedbackbot.integrations.sheets.GoogleSheetsService;
 import com.feedbackbot.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -120,7 +122,7 @@ public class MainServiceImpl implements MainService {
         Optional<InviteToken> inviteOpt = inviteTokenDAO.findByTokenAndIsActiveTrue(token);
 
         if (inviteOpt.isEmpty()) {
-            System.out.println("TOKEN FROM USER: [" + token + "]");
+            log.debug("TOKEN FROM USER: [{}]", token);
             sendAnswer("This invite link is invalid or has expired. Contact your manager.", chatId);
             return;
         }

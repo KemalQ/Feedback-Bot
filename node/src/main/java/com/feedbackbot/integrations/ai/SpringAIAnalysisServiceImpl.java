@@ -1,8 +1,7 @@
-package com.feedbackbot.service.impl;
+package com.feedbackbot.integrations.ai;
 
 import com.feedbackbot.dto.FeedbackAnalysisResult;
 import com.feedbackbot.enums.Sentiment;
-import com.feedbackbot.service.SpringAIAnalysisService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
@@ -29,7 +28,7 @@ public class SpringAIAnalysisServiceImpl implements SpringAIAnalysisService {
                     .entity(FeedbackAnalysisResult.class); // Returning FeedbackAnalysisResult
         }
         catch (RuntimeException e){
-            log.error("❌ AI API call failed: {}", userPrompt, e.getMessage());
+            log.error("❌ AI API call failed: {}", userPrompt, e);
             return FeedbackAnalysisResult.builder()
                     .sentiment(Sentiment.NEUTRAL)
                     .criticality(1)

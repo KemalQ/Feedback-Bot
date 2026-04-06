@@ -31,7 +31,7 @@ public class MessagingApplicationService {
         String callbackData = update.getCallbackQuery().getData();
         Long chatId = update.getCallbackQuery().getMessage().getChatId();
 
-        update.getMessage();
+        //update.getMessage();
 
         log.info("Callback received: {}", callbackData);
         mainService.processCallback(update, callbackData);

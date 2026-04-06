@@ -1,4 +1,4 @@
-package com.feedbackbot.service;
+package com.feedbackbot.integrations.ai;
 
 import com.feedbackbot.dto.FeedbackAnalysisResult;
 
