@@ -4,9 +4,7 @@ import com.feedbackbot.dao.AppUserDAO;
 import com.feedbackbot.dao.FeedbackMessageDAO;
 import com.feedbackbot.dao.InviteTokenDAO;
 import com.feedbackbot.dao.RawDataDAO;
-import com.feedbackbot.dto.FeedbackAnalysisResult;
 import com.feedbackbot.entity.AppUser;
-import com.feedbackbot.entity.FeedbackMessage;
 import com.feedbackbot.entity.InviteToken;
 import com.feedbackbot.entity.RawData;
 import com.feedbackbot.enums.ServiceCommand;
@@ -43,23 +41,21 @@ public class MainServiceImpl implements MainService {
     private final AppUserDAO appUserDAO;
     private final SpringAIAnalysisService springAIAnalysisService;
     private final FeedbackMessageDAO feedbackMessageDAO;
-    private final GoogleSheetsService googleSheetsService;
-    private final TrelloService trelloService;
+    private final FeedbackProcessingServiceImpl feedbackProcessingService;
 
     public MainServiceImpl(RawDataDAO rawDataDAO,
                            InviteTokenDAO inviteTokenDAO,
                            ProducerService producerService, AppUserDAO appUserDAO,
                            SpringAIAnalysisService springAIAnalysisService,
                            FeedbackMessageDAO feedbackMessageDAO,
-                           GoogleSheetsService googleSheetsService, TrelloService trelloService) {
+                           FeedbackProcessingServiceImpl feedbackProcessingService) {
         this.rawDataDAO = rawDataDAO;
         this.inviteTokenDAO = inviteTokenDAO;
         this.producerService = producerService;
         this.appUserDAO = appUserDAO;
         this.springAIAnalysisService = springAIAnalysisService;
         this.feedbackMessageDAO = feedbackMessageDAO;
-        this.googleSheetsService = googleSheetsService;
-        this.trelloService = trelloService;
+        this.feedbackProcessingService = feedbackProcessingService;
     }
 
 
@@ -192,53 +188,10 @@ public class MainServiceImpl implements MainService {
 
         log.info("Feedback received from user {}: {} chars", appUser.getTelegramUserId(), text.length());
 
-        FeedbackAnalysisResult analysis = springAIAnalysisService.analyze(text);
-
-        FeedbackMessage feedback = FeedbackMessage.builder()
-                .user(appUser)
-                .text(text)
-                .sentiment(analysis.getSentiment())
-                .criticality(analysis.getCriticality())
-                .resolution(analysis.getResolution())
-                .isProcessed(false)
-                .build();
-
-        feedbackMessageDAO.save(feedback);
-        log.info("Feedback saved: id={}, criticality={}",
-                feedback.getId(), feedback.getCriticality());
-
-        googleSheetsService.appendFeedbackRow(feedback, appUser);
-
-        trelloService.createCardIfCritical(feedback, appUser);
-
         // Ответ пользователю
-        return buildUserResponse(analysis);
+        return feedbackProcessingService.process(text, appUser);
 
     }
-
-    private String buildUserResponse(FeedbackAnalysisResult analysis) {
-        String emoji = switch (analysis.getSentiment()){
-            case POSITIVE -> "😊";
-            case NEUTRAL  -> "📝";
-            case NEGATIVE -> "⚠️";
-        };
-
-        String urgency = analysis.getCriticality() >= 4
-                ? "\n🚨 This issue has been flagged as high priority."
-                : "";
-
-        return String.format(
-                "%s Your feedback has been received and logged anonymously.\n\n" +
-                        "Assessment: %s | Priority: %d/5\n" +
-                        "Suggested action: %s%s",
-                emoji,
-                analysis.getSentiment().toString().toLowerCase(),
-                analysis.getCriticality(),
-                analysis.getResolution(),
-                urgency
-        );
-    }
-
 
     //
 

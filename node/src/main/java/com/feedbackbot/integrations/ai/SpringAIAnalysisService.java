@@ -1,8 +1,8 @@
 package com.feedbackbot.integrations.ai;
 
 import com.feedbackbot.dto.FeedbackAnalysisResult;
+import com.feedbackbot.dto.FullAiResponse;
 
 public interface SpringAIAnalysisService {
-    FeedbackAnalysisResult analyze(String feedbackText);
-    String analyzeAndReturnString(String feedbackText);
+    FullAiResponse analyze(String feedbackText);
 }

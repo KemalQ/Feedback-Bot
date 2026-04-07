@@ -1,6 +1,8 @@
 package com.feedbackbot.integrations.ai;
 
 import com.feedbackbot.dto.FeedbackAnalysisResult;
+import com.feedbackbot.dto.FullAiResponse;
+import com.feedbackbot.entity.FeedbackMessage;
 import com.feedbackbot.enums.Sentiment;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
@@ -17,7 +19,7 @@ public class SpringAIAnalysisServiceImpl implements SpringAIAnalysisService {
     }
 
     @Override
-    public FeedbackAnalysisResult analyze(String userPrompt) {
+    public FullAiResponse analyze(String userPrompt) {
         String prompt = buildPrompt(userPrompt);
         try {
             log.info("Sending prompt to analyses to Llama: {}", userPrompt);
@@ -25,11 +27,11 @@ public class SpringAIAnalysisServiceImpl implements SpringAIAnalysisService {
                     .system(prompt)
                     .user(userPrompt)
                     .call()
-                    .entity(FeedbackAnalysisResult.class); // Returning FeedbackAnalysisResult
+                    .entity(FullAiResponse.class); // Returning FullAiResponse
         }
         catch (RuntimeException e){
             log.error("❌ AI API call failed: {}", userPrompt, e);
-            return FeedbackAnalysisResult.builder()
+            return FullAiResponse.builder()
                     .sentiment(Sentiment.NEUTRAL)
                     .criticality(1)
                     .resolution("Analysis unavailable. Manual review required.")
@@ -39,12 +41,16 @@ public class SpringAIAnalysisServiceImpl implements SpringAIAnalysisService {
 
     private String buildPrompt(String userPrompt) {
         return """
-                Analyze the following employee feedback from an auto service company.
+                Analyze the following employee feedback from an auto service.
 
+                1. Determine if it's relevant feedback for auto service management (true/false).
+                2. If relevant, analyze sentiment, criticality, and resolution.
+                
                 Feedback: "%s"
 
                 Respond ONLY with a valid JSON object, no explanation, no markdown:
                 {
+                  "isRelevant": "true" or "false",
                   "sentiment": "POSITIVE" or "NEUTRAL" or "NEGATIVE",
                   "criticality": <integer from 1 to 5>,
                   "resolution": "<short actionable suggestion in English, max 100 chars>"
@@ -57,20 +63,5 @@ public class SpringAIAnalysisServiceImpl implements SpringAIAnalysisService {
                 4 - serious issue, urgent action needed
                 5 - critical, immediate response required
                 """.formatted(userPrompt);
-    }
-
-    @Override
-    public String analyzeAndReturnString(String userPrompt) {
-        try {
-            log.info("Sending prompt to Llama: {}", userPrompt);
-            return chatClient.prompt()
-                    .user(userPrompt)
-                    .call()
-                    .content(); // Returning String
-        }
-        catch (RuntimeException e){
-            log.error("Error while sending prompt to Llama: {}", userPrompt, e);
-            return "Error: " + e.getMessage();
-        }
     }
 }
