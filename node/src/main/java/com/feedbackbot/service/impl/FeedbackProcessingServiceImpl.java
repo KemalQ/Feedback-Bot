@@ -41,6 +41,7 @@ public class FeedbackProcessingServiceImpl implements FeedbackProcessingService 
                 .sentiment(aiResponse.getSentiment())
                 .criticality(aiResponse.getCriticality())
                 .resolution(aiResponse.getResolution())
+                .isProcessed(false)
                 .build();   // could use mapper but
 
         feedbackMessageDAO.save(feedback);
@@ -52,7 +53,7 @@ public class FeedbackProcessingServiceImpl implements FeedbackProcessingService 
 
         trelloService.createCardIfCritical(feedback, appUser);
 
-        // Ответ пользователю
+        // response to the user
         return buildUserResponse(aiResponse);
     }
 

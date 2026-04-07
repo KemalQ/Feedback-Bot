@@ -41,27 +41,27 @@ public class SpringAIAnalysisServiceImpl implements SpringAIAnalysisService {
 
     private String buildPrompt(String userPrompt) {
         return """
-                Analyze the following employee feedback from an auto service.
+            You are analyzing employee feedback from an auto service company (mechanics, painters, electricians, etc.).
+            
+            Determine if the message is relevant workplace feedback — complaints, suggestions, safety issues, equipment problems, management issues, etc.
+            Mark as NOT relevant only: greetings, random numbers, test messages, off-topic chatter.
+            When in doubt — mark as relevant.
 
-                1. Determine if it's relevant feedback for auto service management (true/false).
-                2. If relevant, analyze sentiment, criticality, and resolution.
-                
-                Feedback: "%s"
+            Feedback: "%s"
 
-                Respond ONLY with a valid JSON object, no explanation, no markdown:
-                {
-                  "isRelevant": "true" or "false",
-                  "sentiment": "POSITIVE" or "NEUTRAL" or "NEGATIVE",
-                  "criticality": <integer from 1 to 5>,
-                  "resolution": "<short actionable suggestion in English, max 100 chars>"
-                }
+            Respond ONLY with a valid JSON object, no explanation, no markdown, no extra text:
+            {
+              "isRelevant": true,
+              "sentiment": "POSITIVE",
+              "criticality": 3,
+              "resolution": "short actionable suggestion, max 100 chars"
+            }
 
-                Criticality scale:
-                1 - minor suggestion
-                2 - low priority issue
-                3 - moderate issue, needs attention
-                4 - serious issue, urgent action needed
-                5 - critical, immediate response required
-                """.formatted(userPrompt);
+            Rules:
+            - isRelevant: boolean (true or false, no quotes)
+            - sentiment: exactly one of POSITIVE, NEUTRAL, NEGATIVE
+            - criticality: integer 1-5 (1=minor, 3=moderate, 4=urgent, 5=critical)
+            - resolution: string, max 100 chars, English
+            """.formatted(userPrompt);
     }
 }

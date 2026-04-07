@@ -188,7 +188,7 @@ public class MainServiceImpl implements MainService {
 
         log.info("Feedback received from user {}: {} chars", appUser.getTelegramUserId(), text.length());
 
-        // Ответ пользователю
+        // response to the user
         return feedbackProcessingService.process(text, appUser);
 
     }
