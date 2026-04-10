@@ -1,8 +1,6 @@
 package com.feedbackbot.integrations.ai;
 
-import com.feedbackbot.dto.FeedbackAnalysisResult;
 import com.feedbackbot.dto.FullAiResponse;
-import com.feedbackbot.entity.FeedbackMessage;
 import com.feedbackbot.enums.Sentiment;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
@@ -43,7 +41,7 @@ public class SpringAIAnalysisServiceImpl implements SpringAIAnalysisService {
         return """
             You are analyzing employee feedback from an auto service company (mechanics, painters, electricians, etc.).
             
-            Determine if the message is relevant workplace feedback — complaints, suggestions, safety issues, equipment problems, management issues, etc.
+            Determine if the message is relevant workplace feedback — complaints, suggestions, safety issues, equipment problems, management issues, wishes etc.
             Mark as NOT relevant only: greetings, random numbers, test messages, off-topic chatter.
             When in doubt — mark as relevant.
 

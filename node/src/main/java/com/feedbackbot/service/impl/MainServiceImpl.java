@@ -42,13 +42,14 @@ public class MainServiceImpl implements MainService {
     private final SpringAIAnalysisService springAIAnalysisService;
     private final FeedbackMessageDAO feedbackMessageDAO;
     private final FeedbackProcessingServiceImpl feedbackProcessingService;
+    private final KeyboardFactory keyboardFactory;
 
     public MainServiceImpl(RawDataDAO rawDataDAO,
                            InviteTokenDAO inviteTokenDAO,
                            ProducerService producerService, AppUserDAO appUserDAO,
                            SpringAIAnalysisService springAIAnalysisService,
                            FeedbackMessageDAO feedbackMessageDAO,
-                           FeedbackProcessingServiceImpl feedbackProcessingService) {
+                           FeedbackProcessingServiceImpl feedbackProcessingService, KeyboardFactory keyboardFactory) {
         this.rawDataDAO = rawDataDAO;
         this.inviteTokenDAO = inviteTokenDAO;
         this.producerService = producerService;
@@ -56,6 +57,7 @@ public class MainServiceImpl implements MainService {
         this.springAIAnalysisService = springAIAnalysisService;
         this.feedbackMessageDAO = feedbackMessageDAO;
         this.feedbackProcessingService = feedbackProcessingService;
+        this.keyboardFactory = keyboardFactory;
     }
 
 
@@ -141,7 +143,7 @@ public class MainServiceImpl implements MainService {
         appUserDAO.save(appUser);
 
         // Sending inline keyboard for choosing
-        sendRoleKeyboard(chatId, inviteToken.getBranch());
+        keyboardFactory.sendRoleKeyboard(chatId, inviteToken.getBranch());
     }
 
     /// CHOOSING_ROLE: The user clicked the role button
@@ -166,7 +168,7 @@ public class MainServiceImpl implements MainService {
                             "You can now send your feedback anonymously. " +
                             "Your name is never stored — only your position and branch.",
                     appUser.getBranch(),
-                    formatRole(role)
+                    keyboardFactory.formatRole(role)
             );
         } catch (IllegalArgumentException e) {
             log.error("Unknown role received: {}", roleStr);
@@ -231,59 +233,6 @@ public class MainServiceImpl implements MainService {
                 .text(text)
                 .build();
         producerService.produceAnswer(message);
-    }
-
-    private void sendRoleKeyboard(Long chatId, String branch) {
-        SendMessage message = SendMessage.builder().
-                chatId(chatId)
-                .text("Branch: *" + branch + "*\n\nSelect your position:")
-                .parseMode("Markdown")
-                .replyMarkup(buildRoleKeyboard()).build();
-        producerService.produceAnswer(message);
-    }
-
-    private InlineKeyboardMarkup buildRoleKeyboard() {
-        // 2 column, 5 lines + 1 line with 1 button
-        List<InlineKeyboardRow> rows = new ArrayList<>();
-
-        String[][] roleGrid = {
-                {"MASTER_RECEIVER", "Master Receiver",  "MECHANIC",        "Mechanic"},
-                {"ELECTRICIAN",     "Auto Electrician", "PAINTER",         "Auto Painter"},
-                {"PANEL_BEATER",    "Panel Beater",     "DIAGNOSTICIAN",   "Diagnostician"},
-                {"COLORIST",        "Colorist",         "TRIMMER",         "Trimmer"},
-                {"TIRE_TECHNICIAN", "Tire Technician",  "CAR_WASHER",      "Car Washer"}
-        };
-
-        for (String[] row : roleGrid) {
-            List<InlineKeyboardButton> rowButtons = new ArrayList<>();
-            // every line = 2 buttons
-            for (int i = 0; i < row.length; i += 2) {
-                InlineKeyboardButton btn = InlineKeyboardButton.builder()
-                        .text(row[i + 1])
-                        .callbackData("ROLE_" + row[i])
-                        .build();
-                rowButtons.add(btn);
-            }
-            rows.add(new InlineKeyboardRow(rowButtons));
-        }
-
-        return InlineKeyboardMarkup.builder().keyboard(rows).build();
-    }
-
-    private String formatRole(UserRole role) {
-        return switch (role) {
-            case MASTER_RECEIVER  -> "Master Receiver";
-            case MECHANIC         -> "Mechanic";
-            case ELECTRICIAN      -> "Auto Electrician";
-            case PAINTER          -> "Auto Painter";
-            case PANEL_BEATER     -> "Panel Beater";
-            case DIAGNOSTICIAN    -> "Diagnostician";
-            case COLORIST         -> "Colorist";
-            case TRIMMER          -> "Trimmer";
-            case TIRE_TECHNICIAN  -> "Tire Technician";
-            case CAR_WASHER       -> "Car Washer";
-            case MANAGER          -> "Manager";
-        };
     }
 
     private void saveRawData(Update update) {
