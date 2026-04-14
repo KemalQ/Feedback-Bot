@@ -1,5 +1,6 @@
 package com.feedbackbot.dto.token;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -12,11 +13,14 @@ public class InviteTokenCreateRequest {
 
     private String branch;
 
-    private boolean isActive;
+    @JsonProperty("isActive")
+    private boolean isActive; /// ! primitive boolean Lombok -> isisActive()
 
     private LocalDateTime expiresAt;
 
     private LocalDateTime createdAt;
 
     private Boolean used;
+
+    private String createdBy;
 }

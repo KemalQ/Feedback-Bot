@@ -16,13 +16,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InviteTokenNotFoundException.class)
     public ResponseEntity<ApiError> handleInviteTokenNotFoundException(
             InviteTokenNotFoundException exception, WebRequest request){
-        ApiError apiError = new ApiError();
-        apiError.setStatusCode(HttpStatus.NOT_FOUND.value());
-        apiError.setMessage(exception.getMessage());
-        apiError.setPath(request.getDescription(false).replace("uri=", ""));
-        apiError.setErrorTime(LocalDateTime.now());
 
-        return new ResponseEntity<>(apiError, HttpStatus.NOT_FOUND);
+        return buildError(HttpStatus.NOT_FOUND, exception.getMessage(), request);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -42,13 +37,28 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleException(Exception e, WebRequest request){
-        ApiError error = new ApiError();
-        error.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-        error.setMessage("Internal server error ocured " + e.getMessage());
-        error.setErrorTime(LocalDateTime.now());
-        error.setPath(request.getDescription(false).replace("uri= ", ""));
 
-        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+        String message = "Internal server error ocured " + e.getMessage();
+
+        return buildError(HttpStatus.NOT_FOUND, message, request);
     }
 
+    // Feedback Exceptions
+    @ExceptionHandler(FeedbackNotFoundException.class)
+    public ResponseEntity<ApiError> handleFeedbackNotFoundException(
+            FeedbackNotFoundException exception, WebRequest request){
+
+        return buildError(HttpStatus.NOT_FOUND, exception.getMessage(), request);
+    }
+
+    private ResponseEntity<ApiError> buildError(HttpStatus status, String message, WebRequest request){
+        ApiError apiError = new ApiError();
+        apiError.setStatusCode(status.value());
+        apiError.setMessage(message);
+        apiError.setPath(request.getDescription(false).replace("uri=", ""));
+        apiError.setErrorTime(LocalDateTime.now());
+
+        return new ResponseEntity<>(apiError, status);
+
+    }
 }

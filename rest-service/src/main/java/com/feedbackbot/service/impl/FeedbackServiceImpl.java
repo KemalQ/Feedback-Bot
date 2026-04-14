@@ -5,9 +5,10 @@ import com.feedbackbot.dao.specification.FeedbackSpecifications;
 import com.feedbackbot.dto.feedback.FeedbackFilterRequest;
 import com.feedbackbot.dto.feedback.FeedbackResponseDto;
 import com.feedbackbot.entity.FeedbackMessage;
+import com.feedbackbot.exception.FeedbackNotFoundException;
 import com.feedbackbot.mapper.MapperUtils;
 import com.feedbackbot.service.FeedbackService;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,7 +27,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     }
 
     @Override
-    @Transactional // read only
+    @Transactional(readOnly = true) // read only
     public Page<FeedbackResponseDto> findAll(FeedbackFilterRequest filter,// record
                                              Pageable pageable) {
         Specification<FeedbackMessage> spec = Specification
@@ -38,7 +39,15 @@ public class FeedbackServiceImpl implements FeedbackService {
     }
 
     @Override
+    public FeedbackResponseDto findById(Long id) {
+        return feedbackMessageDAO.findById(id).map(feedbackMapper::toFeedbackResponseDto)
+                .orElseThrow(()->new FeedbackNotFoundException("Feedback not found with id: " + id));
+    }
+
+    @Override
     public FeedbackResponseDto markResolved(Long id, String resolution) {
         return null;
     }
+
+
 }

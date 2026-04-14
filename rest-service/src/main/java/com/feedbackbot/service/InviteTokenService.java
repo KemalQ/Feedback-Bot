@@ -1,12 +1,15 @@
 package com.feedbackbot.service;
 
 import com.feedbackbot.dto.token.InviteTokenCreateRequest;
+import com.feedbackbot.dto.token.InviteTokenResponseDto;
 import jakarta.validation.Valid;
 
 import java.util.List;
 
 public interface InviteTokenService {
-    List<InviteTokenCreateRequest> getAll();
+    /// READ
+    List<InviteTokenResponseDto> getAll();
 
-    InviteTokenCreateRequest createToken(@Valid InviteTokenCreateRequest token);
+    /// CREATE
+    InviteTokenResponseDto createToken(InviteTokenCreateRequest token);
 }

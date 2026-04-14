@@ -4,18 +4,16 @@ import com.feedbackbot.enums.UserRole;
 import com.feedbackbot.enums.Sentiment;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-@AllArgsConstructor
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class FeedbackResponseDto {
 
-//    private AppUser user;
-    private Long userId;
-    private String userName;
-    private String firstName;
-    private String lastName;
+//  AppUser
     private String branch;
     private UserRole role;
 

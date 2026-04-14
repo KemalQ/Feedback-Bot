@@ -36,7 +36,7 @@ public class InviteToken {
     @Builder.Default
     private Boolean used = false;
 
-    @Column(name = "created_by", nullable = false)
+    @Column(name = "created_by")
     private String createdBy;//TODO for audition
 }
 

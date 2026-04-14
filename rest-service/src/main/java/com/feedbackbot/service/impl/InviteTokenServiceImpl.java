@@ -2,6 +2,7 @@ package com.feedbackbot.service.impl;
 
 import com.feedbackbot.dao.InviteTokenDAO;
 import com.feedbackbot.dto.token.InviteTokenCreateRequest;
+import com.feedbackbot.dto.token.InviteTokenResponseDto;
 import com.feedbackbot.entity.InviteToken;
 import com.feedbackbot.mapper.MapperUtils;
 import com.feedbackbot.service.InviteTokenService;
@@ -22,14 +23,18 @@ public class InviteTokenServiceImpl implements InviteTokenService {
     }
 
     @Override
-    public List<InviteTokenCreateRequest> getAll() {
-        return inviteTokenDAO.findAll().stream().map(inviteTokenMapper::toInviteTokenDto).toList();
+    public List<InviteTokenResponseDto> getAll() {
+        return inviteTokenDAO.findAll().stream().map(inviteTokenMapper::toInviteTokenResponseDto).toList();
     }
 
     @Override
-    public InviteTokenCreateRequest createToken(InviteTokenCreateRequest token) {
+    public InviteTokenResponseDto createToken(InviteTokenCreateRequest token) {
+        // Set default createdBy if not provided
+        if (token.getCreatedBy() == null) {
+            token.setCreatedBy("system");
+        }
         InviteToken savedToken = inviteTokenDAO.save(inviteTokenMapper.toInviteToken(token));
         log.info("Token successfully saved");
-        return inviteTokenMapper.toInviteTokenDto(savedToken);
+        return inviteTokenMapper.toInviteTokenResponseDto(savedToken);
     }
 }

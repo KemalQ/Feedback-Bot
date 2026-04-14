@@ -3,11 +3,9 @@ package com.feedbackbot.exception;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
 
-@RequiredArgsConstructor
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
