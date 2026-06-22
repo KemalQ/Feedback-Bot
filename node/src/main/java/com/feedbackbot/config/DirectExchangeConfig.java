@@ -11,6 +11,7 @@ import static com.feedbackbot.module.RabbitQueue.*;
 
 @Configuration
 public class DirectExchangeConfig {
+
     @Bean
     public DirectExchange directExchange() {
         return new DirectExchange(DIRECT_EXCHANGE, true, false);

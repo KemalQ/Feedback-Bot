@@ -34,6 +34,11 @@ public class DirectExchangeConfig {
         return new Queue(ANSWER_MESSAGE, true);
     }
 
+    @Bean
+    public Queue voiceQueue(){/// For voice messages
+        return new Queue(VOICE_ROUTE_UPDATE, true);
+    }
+
 
     //BINDINGS
     @Bean
@@ -48,5 +53,12 @@ public class DirectExchangeConfig {
         return BindingBuilder.bind(answerQueue())
                 .to(directExchangeMethod())
                 .with(ANSWER_ROUTE);
+    }
+
+    @Bean
+    public Binding audioBinding(){/// For voice messages
+        return BindingBuilder.bind(voiceQueue())
+                .to(directExchangeMethod())
+                .with(VOICE_ROUTE);
     }
 }

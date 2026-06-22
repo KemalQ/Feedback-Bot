@@ -1,17 +1,20 @@
 package com.feedbackbot.bot;
 
+import com.feedbackbot.entity.VoiceUpdateDto;
 import com.feedbackbot.utils.MessageUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.File;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.Voice;
 
 import java.util.UUID;
 
-import static com.feedbackbot.module.RabbitQueue.DIRECT_EXCHANGE;
-import static com.feedbackbot.module.RabbitQueue.TEXT_ROUTE;
+import static com.feedbackbot.module.RabbitQueue.*;
 
 @Slf4j
 @Component
@@ -42,6 +45,9 @@ public class UpdateProcessor {
             // TODO -Static answer, change after webhook test
 //            telegramBot.sendAnswerMessage(messageUtils.generateSendMessageWithText(update, "answer"));
         }
+        else if(update.hasMessage() && update.getMessage().hasVoice()){/// For audio messages
+            distributeMessageByType(update);
+        }
         else {
             log.warn("Unsupported message type is:  {}" , update);
         }
@@ -65,6 +71,10 @@ public class UpdateProcessor {
             processTextMessage(update);
             log.info("Text message received: {}", update.getMessage().getText());
         }
+        if (message.hasVoice()){ /// For voice messages
+            processVoiceMessage(update);
+            log.info("Audio message received: {}", update.getMessage().getVoice());//TODO check
+        }
         /// In the future feedback messages might be extended
 //        else if (message.hasDocument()) {
 //            processDocMessage(update);
@@ -75,6 +85,8 @@ public class UpdateProcessor {
             setUnsupportedMessageTypeView(update);
         }
     }
+
+
 
     private void setUnsupportedMessageTypeView(Update update) {
         var sendMessage = messageUtils.generateSendMessageWithText(update, "Unsupported message type!");
@@ -112,6 +124,48 @@ public class UpdateProcessor {
                 TEXT_ROUTE,
                 update,
                 createCorrelationData());
+    }
+
+    private void processVoiceMessage(Update update) { /// For voice messages
+        // Download audio file from Telegram
+        Voice voice = update.getMessage().getVoice();
+        String fileId = voice.getFileId();
+
+        log.info("Voice message received: fileId={}, duration={}s, size={}bytes",
+                fileId, voice.getDuration(), voice.getFileSize());
+        try{
+            //Step1 - Get file info
+            GetFile getFileRequest = new GetFile(fileId);
+            File telegramFile = telegramBot.executeGetFile(getFileRequest);
+            String filePath = telegramFile.getFilePath();
+            log.info("File path from Telegram: {}", filePath);
+
+            //Step 2 -Download audio file
+            byte[] audioBytes = telegramBot.downloadFileBytes(filePath);
+            log.info("Download audio: {} bytes", audioBytes.length);
+
+            //Step 3 - Create VoiceUpdateDto
+            VoiceUpdateDto voiceUpdateDto = new VoiceUpdateDto(
+                    update,
+                    audioBytes,
+                    voice.getDuration(),
+                    voice.getMimeType());
+
+            //Step 4 - sending to queue
+            rabbitTemplate.convertAndSend(
+                    DIRECT_EXCHANGE,
+                    VOICE_ROUTE,
+                    voiceUpdateDto,
+                    createCorrelationData()
+            );
+            log.info("Voice DTO sent to queue successfully");
+        } catch (Exception e){
+            log.error("Failed to process voice message: {}", e.getMessage(), e);
+            setView(messageUtils.generateSendMessageWithText(update,
+                    "❌ Failed to process voice message, Please try again"));
+        }
+
+
     }
 
     private CorrelationData createCorrelationData() {
