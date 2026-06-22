@@ -1,5 +1,7 @@
 package com.feedbackbot.listener;
 
+import com.feedbackbot.entity.VoiceUpdateDto;
+import com.feedbackbot.service.impl.MessagingApplicationServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -8,18 +10,19 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import static com.feedbackbot.module.RabbitQueue.TEXT_MESSAGE_UPDATE;
+import static com.feedbackbot.module.RabbitQueue.VOICE_ROUTE_UPDATE;
 
 @Slf4j
 @Service
 public class RabbitMessageListener {
-    private final MessagingApplicationService messagingApplicationService;
+    private final MessagingApplicationServiceImpl messagingApplicationService;
 
-    public RabbitMessageListener(MessagingApplicationService messagingApplicationService) {
+    public RabbitMessageListener(MessagingApplicationServiceImpl messagingApplicationService) {
         this.messagingApplicationService = messagingApplicationService;
     }
 
     @RabbitListener(queues = TEXT_MESSAGE_UPDATE)
-    public void consumeUpdate(Update update,
+    public void consumeTextUpdate(Update update,
                               @Header(value = "invite_token", required = false) String inviteToken) {
         try {
 
@@ -37,6 +40,17 @@ public class RabbitMessageListener {
             log.error("❌ Failed to process notification: {}", update.getMessage().getText(), e);
 
             throw new AmqpRejectAndDontRequeueException("Invalid message payload", e);
+        }
+    }
+
+    @RabbitListener(queues = VOICE_ROUTE_UPDATE)
+    public void consumeVoiceUpdate(VoiceUpdateDto voiceUpdateDto){
+        try{
+            messagingApplicationService.handleVoiceUpdate(voiceUpdateDto);
+        }
+        catch (IllegalArgumentException e){
+            log.error("❌ Failed to process voice message", e);
+            throw new AmqpRejectAndDontRequeueException("Invalid voice message payload", e);
         }
     }
 }

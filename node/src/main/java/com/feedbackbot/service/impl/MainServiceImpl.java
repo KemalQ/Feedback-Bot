@@ -10,21 +10,14 @@ import com.feedbackbot.entity.RawData;
 import com.feedbackbot.enums.ServiceCommand;
 import com.feedbackbot.enums.UserRole;
 import com.feedbackbot.integrations.ai.SpringAIAnalysisService;
-import com.feedbackbot.integrations.sheets.GoogleSheetsService;
-import com.feedbackbot.integrations.trello.TrelloService;
 import com.feedbackbot.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardRow;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import static com.feedbackbot.enums.ServiceCommand.CANCEL;
@@ -68,6 +61,38 @@ public class MainServiceImpl implements MainService {
         var appUser = findOrSaveAppUser(update);
         var userState = appUser.getState();
         var text = update.getMessage().getText();
+        var chatId = update.getMessage().getChatId();
+        var output = "";
+
+        var serviceCommand = ServiceCommand.fromValue(text);
+
+        // /cancel works from any state
+        if (CANCEL.equals(serviceCommand)) {
+            output = cancelProcess(appUser);
+            sendAnswer(output, chatId);
+            return;
+        }
+
+        // FSM
+        switch (userState) {
+            case NEW -> output = handleNewState(appUser, text);
+            case CHOOSING_ROLE -> output = handleChoosingRole(appUser, text, chatId);
+            case ACTIVE -> output = handleActiveFeedback(appUser, text);
+            default -> {
+                log.error("Unknown user state: {}", userState);
+                output = "Something went wrong. Type /cancel and try again.";
+            }
+        }
+
+        sendAnswer(output, chatId);
+    }
+
+    @Override
+    public void processVoiceMessage(Update update, String text) {
+        saveRawData(update);
+
+        var appUser = findOrSaveAppUser(update);
+        var userState = appUser.getState();
         var chatId = update.getMessage().getChatId();
         var output = "";
 
@@ -197,7 +222,7 @@ public class MainServiceImpl implements MainService {
 
     //
 
-    private String help(){
+    private String help() {
         return "List of available commands:\n"
                 + "/cancel - cancel execution of the current command\n"
                 + "/registration - user registration";
@@ -212,10 +237,10 @@ public class MainServiceImpl implements MainService {
         return "Cancelled. Use your invite link to start again.";
     }
 
-    private AppUser findOrSaveAppUser(Update update){
+    private AppUser findOrSaveAppUser(Update update) {
         User telegramUser = update.getMessage().getFrom();
         return appUserDAO.findByTelegramUserId(telegramUser.getId())
-                .orElseGet(()->{
+                .orElseGet(() -> {
                     AppUser newUser = AppUser.builder()
                             .telegramUserId(telegramUser.getId())
                             .userName(telegramUser.getUserName())
