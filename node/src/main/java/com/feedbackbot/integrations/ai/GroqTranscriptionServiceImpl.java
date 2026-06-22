@@ -32,7 +32,7 @@ public class GroqTranscriptionServiceImpl implements GroqTranscriptionService{//
         };
         AudioTranscriptionPrompt prompt = new AudioTranscriptionPrompt(audioResource,
                 OpenAiAudioTranscriptionOptions.builder().
-                        model("whisper-large-v3").language("ru")
+                        model("whisper-large-v3")//.language("en")
                         .responseFormat(OpenAiAudioApi.TranscriptResponseFormat.JSON)
                         .build());
 

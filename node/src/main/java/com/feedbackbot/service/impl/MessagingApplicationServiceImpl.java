@@ -9,6 +9,7 @@ import com.feedbackbot.service.ProducerService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.Voice;
 
@@ -63,7 +64,6 @@ public class MessagingApplicationServiceImpl implements MessagingApplicationServ
     public void handleVoiceUpdate(VoiceUpdateDto voiceUpdateDto){
         Update update = voiceUpdateDto.getUpdate();
         byte[] audioBytes = voiceUpdateDto.getVoiceBytes();
-        log.info("AUDIO BUTES: {}", audioBytes);
         Voice voice = update.getMessage().getVoice();
 
         try {
@@ -80,6 +80,14 @@ public class MessagingApplicationServiceImpl implements MessagingApplicationServ
         }
         catch (Exception e){
             log.error("❌ Failed to process voice message", e);
+
+            Long chatId = voiceUpdateDto.getUpdate().getMessage().getChatId();
+            SendMessage errorMsg = SendMessage.builder()
+                    .chatId(chatId)
+                    .text("Failed to process voice message")
+                    .build();
+            producerService.produceAnswer(errorMsg)
+            ;
             throw new AmqpRejectAndDontRequeueException("Failed to process voice message", e);
         }
     }

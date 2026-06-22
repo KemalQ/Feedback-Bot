@@ -56,67 +56,13 @@ public class MainServiceImpl implements MainService {
 
     @Override
     public void processTextMessage(Update update) {
-        saveRawData(update);
-
-        var appUser = findOrSaveAppUser(update);
-        var userState = appUser.getState();
-        var text = update.getMessage().getText();
-        var chatId = update.getMessage().getChatId();
-        var output = "";
-
-        var serviceCommand = ServiceCommand.fromValue(text);
-
-        // /cancel works from any state
-        if (CANCEL.equals(serviceCommand)) {
-            output = cancelProcess(appUser);
-            sendAnswer(output, chatId);
-            return;
-        }
-
-        // FSM
-        switch (userState) {
-            case NEW -> output = handleNewState(appUser, text);
-            case CHOOSING_ROLE -> output = handleChoosingRole(appUser, text, chatId);
-            case ACTIVE -> output = handleActiveFeedback(appUser, text);
-            default -> {
-                log.error("Unknown user state: {}", userState);
-                output = "Something went wrong. Type /cancel and try again.";
-            }
-        }
-
-        sendAnswer(output, chatId);
+        String text = update.getMessage().getText();
+        processIncomingText(update, text);
     }
 
     @Override
     public void processVoiceMessage(Update update, String text) {
-        saveRawData(update);
-
-        var appUser = findOrSaveAppUser(update);
-        var userState = appUser.getState();
-        var chatId = update.getMessage().getChatId();
-        var output = "";
-
-        var serviceCommand = ServiceCommand.fromValue(text);
-
-        // /cancel works from any state
-        if (CANCEL.equals(serviceCommand)) {
-            output = cancelProcess(appUser);
-            sendAnswer(output, chatId);
-            return;
-        }
-
-        // FSM
-        switch (userState) {
-            case NEW -> output = handleNewState(appUser, text);
-            case CHOOSING_ROLE -> output = handleChoosingRole(appUser, text, chatId);
-            case ACTIVE -> output = handleActiveFeedback(appUser, text);
-            default -> {
-                log.error("Unknown user state: {}", userState);
-                output = "Something went wrong. Type /cancel and try again.";
-            }
-        }
-
-        sendAnswer(output, chatId);
+        processIncomingText(update, text);
     }
 
     /// NEW: waiting /start without token
@@ -169,6 +115,37 @@ public class MainServiceImpl implements MainService {
 
         // Sending inline keyboard for choosing
         keyboardFactory.sendRoleKeyboard(chatId, inviteToken.getBranch());
+    }
+
+    private void processIncomingText(Update update, String text){
+        saveRawData(update);
+
+        var appUser = findOrSaveAppUser(update);
+        var userState = appUser.getState();
+        var chatId = update.getMessage().getChatId();
+        var output = "";
+
+        var serviceCommand = ServiceCommand.fromValue(text);
+
+        // /cancel works from any state
+        if (CANCEL.equals(serviceCommand)) {
+            output = cancelProcess(appUser);
+            sendAnswer(output, chatId);
+            return;
+        }
+
+        // FSM
+        switch (userState) {
+            case NEW -> output = handleNewState(appUser, text);
+            case CHOOSING_ROLE -> output = handleChoosingRole(appUser, text, chatId);
+            case ACTIVE -> output = handleActiveFeedback(appUser, text);
+            default -> {
+                log.error("Unknown user state: {}", userState);
+                output = "Something went wrong. Type /cancel and try again.";
+            }
+        }
+
+        sendAnswer(output, chatId);
     }
 
     /// CHOOSING_ROLE: The user clicked the role button
