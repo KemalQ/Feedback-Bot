@@ -1,22 +1,23 @@
 package com.feedbackbot.controller;
 
+import com.feedbackbot.dto.PageResponse;
 import com.feedbackbot.dto.token.InviteTokenCreateRequest;
 import com.feedbackbot.dto.token.InviteTokenResponseDto;
 import com.feedbackbot.service.InviteTokenService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.servlet.view.RedirectView;
 
 import java.net.URI;
-import java.net.URL;
-import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("/admin/tokens/")
+@RequestMapping("/admin/tokens")
 public class TokenController {
 
     private final InviteTokenService inviteTokenService;
@@ -25,10 +26,22 @@ public class TokenController {
         this.inviteTokenService = inviteTokenService;
     }
 
+    @GetMapping("/")
+    public RedirectView redirectWithTrailingSlash() {
+        return new RedirectView("/admin/tokens");
+    }
+
     @GetMapping
-    public ResponseEntity<List<InviteTokenResponseDto>> getTokens(Pageable pageable) {
+    public PageResponse<InviteTokenResponseDto> getTokens(Pageable pageable) {
         log.info("Getting all invite tokens page: {}, size: {}", pageable.getPageNumber(), pageable.getPageSize());
-        return ResponseEntity.ok(inviteTokenService.getAll());
+        Page<InviteTokenResponseDto> page = inviteTokenService.getAll(pageable);
+        return new PageResponse<>(
+                page.getContent(),
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages()
+        );
     }
 
     @PostMapping
@@ -46,8 +59,12 @@ public class TokenController {
         return ResponseEntity.created(location).body(savedToken);
     }
 
-//    @DeleteMapping
-//    public ResponseEntity<InviteT>
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteInviteToken(@PathVariable Long id){
+        inviteTokenService.deleteToken(id);
+        log.info("Invite Token deleted! id = {}", id);
+        return ResponseEntity.noContent().build();
+    }
 
 
 

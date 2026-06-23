@@ -39,6 +39,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     }
 
     @Override
+    @Transactional(readOnly = true)// without it hibernate will not be able to read AppUser fields for FeedbackResponseDto
     public FeedbackResponseDto findById(Long id) {
         return feedbackMessageDAO.findById(id).map(feedbackMapper::toFeedbackResponseDto)
                 .orElseThrow(()->new FeedbackNotFoundException("Feedback not found with id: " + id));

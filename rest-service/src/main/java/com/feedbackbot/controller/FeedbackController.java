@@ -1,17 +1,16 @@
 package com.feedbackbot.controller;
 
+import com.feedbackbot.dto.PageResponse;
 import com.feedbackbot.dto.feedback.FeedbackFilterRequest;
 import com.feedbackbot.dto.feedback.FeedbackResponseDto;
-import com.feedbackbot.dto.token.InviteTokenCreateRequest;
 import com.feedbackbot.service.FeedbackService;
-import com.feedbackbot.service.InviteTokenService;
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.view.RedirectView;
 
 @Slf4j
 @RestController
@@ -24,12 +23,18 @@ public class FeedbackController {
         this.feedbackService = feedbackService;
     }
 
+    @GetMapping("/")
+    public RedirectView redirectWithTrailingSlash() {
+        return new RedirectView("/admin/feedbacks");
+    }
+
     @GetMapping
-    public Page<FeedbackResponseDto> getAll(
+    public PageResponse<FeedbackResponseDto> getAll(
             @ModelAttribute FeedbackFilterRequest filter,   // record instead of 5 @RequestParam
             @PageableDefault Pageable pageable) {
         log.info("Getting all feedbacks page: {}, size: {}", pageable.getPageNumber(), pageable.getPageSize());
-        return feedbackService.findAll(filter, pageable);
+        Page<FeedbackResponseDto> page = feedbackService.findAll(filter, pageable);
+        return new PageResponse<>(page.getContent(), page.getNumber(), page.getSize(), page.getTotalElements(), page.getTotalPages());
     }
 
     @GetMapping("/{id}")

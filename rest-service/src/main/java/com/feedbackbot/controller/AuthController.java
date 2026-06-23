@@ -28,4 +28,14 @@ public class AuthController {
         return ResponseEntity.ok(authService.login(request));
     }
 
+
+    @GetMapping(value = {"/sign-up", "/register"})
+    public ResponseEntity<String> signUpPage(){
+        return ResponseEntity.ok("SignUp");
+    }
+
+    @PostMapping(value = {"/sign-up", "/register"})
+    public ResponseEntity<String> signUp(@Valid @RequestBody LoginRequest request ) {
+        return ResponseEntity.ok(authService.register(request));
+    }
 }

@@ -2,14 +2,16 @@ package com.feedbackbot.service;
 
 import com.feedbackbot.dto.token.InviteTokenCreateRequest;
 import com.feedbackbot.dto.token.InviteTokenResponseDto;
-import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-import java.util.List;
 
 public interface InviteTokenService {
     /// READ
-    List<InviteTokenResponseDto> getAll();
+    Page<InviteTokenResponseDto> getAll(Pageable pageable);
 
     /// CREATE
     InviteTokenResponseDto createToken(InviteTokenCreateRequest token);
+
+    void deleteToken(Long id);
 }
