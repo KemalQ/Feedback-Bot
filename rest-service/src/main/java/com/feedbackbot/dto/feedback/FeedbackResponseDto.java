@@ -19,18 +19,11 @@ public class FeedbackResponseDto {
 
 
     private String text;
-
     private Sentiment sentiment;
-
     private Integer criticality;
-
     private String resolution;
-
     private String googleDocRowId;
-
     private String trelloCardId;
-
     private Boolean isProcessed;
-
     private LocalDateTime createdAt;
 }

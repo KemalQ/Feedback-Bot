@@ -33,7 +33,8 @@ public class FeedbackServiceImpl implements FeedbackService {
         Specification<FeedbackMessage> spec = Specification
                 .where(FeedbackSpecifications.hasBranch(filter.getBranch()))
                         .and(FeedbackSpecifications.hasRole(filter.getRole()))
-                        .and(FeedbackSpecifications.hasCriticality(filter.getCriticality()));
+                        .and(FeedbackSpecifications.hasCriticality(filter.getCriticality()))
+                .and(FeedbackSpecifications.hasSentiment(filter.getSentiment()));
 
         return feedbackMessageDAO.findAll(spec, pageable).map(feedbackMapper::toFeedbackResponseDto);
     }
@@ -44,6 +45,7 @@ public class FeedbackServiceImpl implements FeedbackService {
         return feedbackMessageDAO.findById(id).map(feedbackMapper::toFeedbackResponseDto)
                 .orElseThrow(()->new FeedbackNotFoundException("Feedback not found with id: " + id));
     }
+
 
     @Override
     public FeedbackResponseDto markResolved(Long id, String resolution) {

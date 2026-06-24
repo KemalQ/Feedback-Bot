@@ -1,6 +1,7 @@
 package com.feedbackbot.dao.specification;
 
 import com.feedbackbot.entity.FeedbackMessage;
+import com.feedbackbot.enums.Sentiment;
 import org.springframework.data.jpa.domain.Specification;
 
 public class FeedbackSpecifications {
@@ -18,5 +19,10 @@ public class FeedbackSpecifications {
     public static Specification<FeedbackMessage> hasCriticality(Integer criticality) {
         return (root, query, cb) -> criticality == null ? null :
                 cb.equal(root.get("criticality"), criticality);
+    }
+
+    public static Specification<FeedbackMessage> hasSentiment(Sentiment sentiment){
+        return((root, query, cb) -> sentiment == null ? null :
+                cb.equal(root.get("user").get("sentiment"), sentiment));
     }
 }
