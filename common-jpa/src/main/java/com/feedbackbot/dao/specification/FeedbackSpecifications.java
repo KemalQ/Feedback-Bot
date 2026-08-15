@@ -23,6 +23,6 @@ public class FeedbackSpecifications {
 
     public static Specification<FeedbackMessage> hasSentiment(Sentiment sentiment){
         return((root, query, cb) -> sentiment == null ? null :
-                cb.equal(root.get("user").get("sentiment"), sentiment));
+                cb.equal(root.get("sentiment"), sentiment));
     }
 }

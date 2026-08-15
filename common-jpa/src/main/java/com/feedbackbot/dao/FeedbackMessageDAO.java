@@ -21,18 +21,6 @@ public interface FeedbackMessageDAO extends JpaRepository<FeedbackMessage, Long>
     @EntityGraph(value = "FeedbackMessage.user")
     Page<FeedbackMessage> findAll(Specification<FeedbackMessage> spec, Pageable pageable);
 
-    @Query("SELECT f FROM FeedbackMessage f JOIN f.user u WHERE "+
-            "(:branch IS NULL OR u.branch = :branch) AND "+
-            "(:role IS NULL OR u.role = :role) AND " +
-            "(:criticality IS NULL OR f.criticality = :criticality) AND "+
-            "(:sentiment IS NULL OR f.sentiment = :sentiment)")
-    List<FeedbackMessage> findByFilters(
-            @Param("branch") String branch,
-            @Param("role") String role,
-            @Param("criticality") Integer criticality,
-            @Param("sentiment") Sentiment sentiment
-    );
-
     // for Trello, criticality >= 4
     List<FeedbackMessage> findByIsProcessedFalseAndCriticalityGreaterThanEqual(Integer criticality);
 }
