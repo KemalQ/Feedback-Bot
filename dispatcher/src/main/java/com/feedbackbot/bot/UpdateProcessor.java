@@ -2,6 +2,7 @@ package com.feedbackbot.bot;
 
 import com.feedbackbot.entity.VoiceUpdateDto;
 import com.feedbackbot.utils.MessageUtils;
+import com.github.benmanes.caffeine.cache.Cache;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -23,11 +24,15 @@ public class UpdateProcessor {
     private final RabbitTemplate rabbitTemplate;
     private final TelegramBot telegramBot;
     private final MessageUtils messageUtils;
+    private final Cache<Long, Boolean> processedUpdateIdsCache;
+    private final Cache<String, Boolean> processUpdateStringCache;
 
-    public UpdateProcessor(RabbitTemplate rabbitTemplate, TelegramBot telegramBot, MessageUtils messageUtils) {
+    public UpdateProcessor(RabbitTemplate rabbitTemplate, TelegramBot telegramBot, MessageUtils messageUtils, Cache<Long, Boolean> processedUpdateIdsCache, Cache<String, Boolean> processUpdateStringCache) {
         this.rabbitTemplate = rabbitTemplate;
         this.telegramBot = telegramBot;
         this.messageUtils = messageUtils;
+        this.processedUpdateIdsCache = processedUpdateIdsCache;
+        this.processUpdateStringCache = processUpdateStringCache;
     }
 
     public void processUpdate(Update update) {
@@ -36,14 +41,21 @@ public class UpdateProcessor {
             return;
         }
 
+        Integer updateId = update.getUpdateId();
+        if (updateId != null && isIdDuplicate(updateId)) {
+            log.info("Duplicate update_id={} ignored", updateId);
+            return;
+        }
+
         if (update.hasCallbackQuery()){
             processCallBackQuery(update);
         }
         else if (update.hasMessage() && update.getMessage().hasText()) {
+            if(isContentDuplicate(update)){
+                log.info("Duplicate content ignored, userId={}", update.getMessage().getFrom().getId());
+                return;
+            }
             distributeMessageByType(update);
-
-            // TODO -Static answer, change after webhook test
-//            telegramBot.sendAnswerMessage(messageUtils.generateSendMessageWithText(update, "answer"));
         }
         else if(update.hasMessage() && update.getMessage().hasVoice()){/// For audio messages
             distributeMessageByType(update);
@@ -51,6 +63,23 @@ public class UpdateProcessor {
         else {
             log.warn("Unsupported message type is:  {}" , update);
         }
+    }
+
+    private boolean isIdDuplicate(long updateId){
+        Boolean seen = processedUpdateIdsCache.getIfPresent(updateId);
+        if(seen != null){
+            return true;
+        }
+        processedUpdateIdsCache.put(updateId, Boolean.TRUE);
+        return false;
+    }
+    private boolean isContentDuplicate(Update update){
+        Long userId = update.getMessage().getFrom().getId();
+        String text = update.getMessage().getText();
+        String key = userId + ":" + text;
+
+        Boolean previous = processUpdateStringCache.asMap().putIfAbsent(key, Boolean.TRUE);
+        return previous != null;
     }
 
     private void processCallBackQuery(Update update) {
@@ -71,16 +100,10 @@ public class UpdateProcessor {
             processTextMessage(update);
             log.info("Text message received: {}", update.getMessage().getText());
         }
-        if (message.hasVoice()){ /// For voice messages
+        else if (message.hasVoice()){ /// For voice messages
             processVoiceMessage(update);
             log.info("Audio message received: {}", update.getMessage().getVoice());//TODO check
         }
-        /// In the future feedback messages might be extended
-//        else if (message.hasDocument()) {
-//            processDocMessage(update);
-//        } else if (message.hasPhoto()) {
-//            processPhotoMessage(update);
-//        }
         else{
             setUnsupportedMessageTypeView(update);
         }
