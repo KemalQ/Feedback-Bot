@@ -23,15 +23,6 @@ public class AppUser {
     @Column(name = "telegram_user_id", unique = true, nullable = false)
     private Long telegramUserId;
 
-    @Column(name = "username")
-    private String userName;
-
-    @Column(name = "first_name")
-    private String firstName;
-
-    @Column(name = "last_name")
-    private String lastName;
-
     @Column(name = "branch")
     private String branch;
 

@@ -80,7 +80,6 @@ public class MainServiceImpl implements MainService {
     /// method for /start with token (called from processStartWithToken)
     @Override
     public void processStartWithToken(Update update, String token) {
-        saveRawData(update);
         var appUser = findOrSaveAppUser(update);
         var chatId = update.getMessage().getChatId();
 
@@ -118,7 +117,6 @@ public class MainServiceImpl implements MainService {
     }
 
     private void processIncomingText(Update update, String text){
-        saveRawData(update);
 
         var appUser = findOrSaveAppUser(update);
         var userState = appUser.getState();
@@ -220,9 +218,6 @@ public class MainServiceImpl implements MainService {
                 .orElseGet(() -> {
                     AppUser newUser = AppUser.builder()
                             .telegramUserId(telegramUser.getId())
-                            .userName(telegramUser.getUserName())
-                            .firstName(telegramUser.getFirstName())
-                            .lastName(telegramUser.getLastName())
                             .state(NEW)
                             .build();
                     return appUserDAO.save(newUser);
