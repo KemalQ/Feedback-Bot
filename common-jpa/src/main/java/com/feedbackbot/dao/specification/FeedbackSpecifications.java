@@ -2,6 +2,7 @@ package com.feedbackbot.dao.specification;
 
 import com.feedbackbot.entity.FeedbackMessage;
 import com.feedbackbot.enums.Sentiment;
+import com.feedbackbot.enums.UserRole;
 import org.springframework.data.jpa.domain.Specification;
 
 public class FeedbackSpecifications {
@@ -11,7 +12,7 @@ public class FeedbackSpecifications {
                 cb.equal(root.join("user").get("branch"), branch);
     }
 
-    public static Specification<FeedbackMessage> hasRole(String role) {
+    public static Specification<FeedbackMessage> hasRole(UserRole role) {
         return (root, query, cb) -> role == null ? null :
                 cb.equal(root.join("user").get("role"), role);
     }
@@ -22,7 +23,7 @@ public class FeedbackSpecifications {
     }
 
     public static Specification<FeedbackMessage> hasSentiment(Sentiment sentiment){
-        return((root, query, cb) -> sentiment == null ? null :
-                cb.equal(root.get("sentiment"), sentiment));
+        return(root, query, cb) -> sentiment == null ? null :
+                cb.equal(root.get("sentiment"), sentiment);
     }
 }

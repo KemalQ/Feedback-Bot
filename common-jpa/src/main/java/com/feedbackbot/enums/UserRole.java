@@ -12,4 +12,4 @@ public enum UserRole {
     TRIMMER,
     TIRE_TECHNICIAN,
     CAR_WASHER
-    }
+}

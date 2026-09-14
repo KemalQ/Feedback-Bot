@@ -1,22 +1,27 @@
 package com.feedbackbot.exception;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.LocalDateTime;
+import java.util.Locale;
 
 import static java.util.stream.Collectors.joining;
 
+@Slf4j
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
     @ExceptionHandler(InviteTokenNotFoundException.class)
     public ResponseEntity<ApiError> handleInviteTokenNotFoundException(
             InviteTokenNotFoundException exception, WebRequest request){
-
+        log.error("Invite Token Not Found Exception: " + exception.getMessage());
         return buildError(HttpStatus.NOT_FOUND, exception.getMessage(), request);
     }
 
@@ -26,29 +31,34 @@ public class GlobalExceptionHandler {
                 .map(error -> error.getField() + ": " + error.getDefaultMessage())
                 .collect(joining(", "));
 
-        ApiError error = new ApiError();
-        error.setStatusCode(HttpStatus.BAD_REQUEST.value());
-        error.setMessage(message);
-        error.setErrorTime(LocalDateTime.now());
-        error.setPath(request.getDescription(false).replace("uri= ", ""));
+        return buildError(HttpStatus.BAD_REQUEST, message, request);
+    }
 
-        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiError> handleTypeMismatchException(MethodArgumentTypeMismatchException e, WebRequest request){
+        String message = String.format("Invalid value '%s' for parameter '%s'",
+                e.getValue(), e.getName());
+        return buildError(HttpStatus.BAD_REQUEST, message, request);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiError> handleIllegalArgumentException(IllegalArgumentException e, WebRequest request){
+        String message = "Invalid argument: " + e.getMessage();
+        return buildError(HttpStatus.BAD_REQUEST, message, request);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleException(Exception e, WebRequest request){
 
-        String message = "Internal server error ocured " + e.getMessage();
-
-        return buildError(HttpStatus.NOT_FOUND, message, request);
+        log.error("Unhandled exception at {}", request.getDescription(false), e);
+        return buildError(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error", request);
     }
 
-    // Feedback Exceptions
     @ExceptionHandler(FeedbackNotFoundException.class)
     public ResponseEntity<ApiError> handleFeedbackNotFoundException(
             FeedbackNotFoundException exception, WebRequest request){
-
-        return buildError(HttpStatus.NOT_FOUND, exception.getMessage(), request);
+        log.error("Feedback Not Found: " + exception.getMessage());
+        return buildError(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error", request);
     }
 
     private ResponseEntity<ApiError> buildError(HttpStatus status, String message, WebRequest request){

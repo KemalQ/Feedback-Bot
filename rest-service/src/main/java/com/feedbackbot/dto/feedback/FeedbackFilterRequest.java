@@ -1,12 +1,13 @@
 package com.feedbackbot.dto.feedback;
 
 import com.feedbackbot.enums.Sentiment;
+import com.feedbackbot.enums.UserRole;
 import lombok.Data;
 
 @Data
 public class FeedbackFilterRequest {
     String branch;
-    String role;
+    UserRole role;
     Integer criticality;
     Sentiment sentiment;
 }
