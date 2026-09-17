@@ -21,11 +21,13 @@ public class SpringAIAnalysisServiceImpl implements SpringAIAnalysisService {
         String prompt = buildPrompt(userPrompt);
         try {
             log.info("Sending prompt to analyses to Llama: {}", userPrompt);
-            return chatClient.prompt()
+            FullAiResponse response =  chatClient.prompt()
                     .system(prompt)
                     .user(userPrompt)
                     .call()
                     .entity(FullAiResponse.class); // Returning FullAiResponse
+            response.setProcessed(true);
+            return response;
         }
         catch (RuntimeException e){
             log.error("❌ AI API call failed: {}", userPrompt, e);
@@ -33,6 +35,7 @@ public class SpringAIAnalysisServiceImpl implements SpringAIAnalysisService {
                     .sentiment(Sentiment.NEUTRAL)
                     .criticality(1)
                     .resolution("Analysis unavailable. Manual review required.")
+                    .isProcessed(false)
                     .build();
         }
     }

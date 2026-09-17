@@ -13,6 +13,7 @@ import com.feedbackbot.integrations.ai.SpringAIAnalysisService;
 import com.feedbackbot.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
@@ -53,6 +54,10 @@ public class MainServiceImpl implements MainService {
         this.keyboardFactory = keyboardFactory;
     }
 
+    @Value("${MIN_LENGTH}")
+    private Integer minLength;
+    @Value("${MAX_LENGTH}")
+    private Integer maxLength;
 
     @Override
     public void processTextMessage(Update update) {
@@ -181,10 +186,10 @@ public class MainServiceImpl implements MainService {
         if (text == null || text.isBlank()) {
             return "Please send a text message with your feedback.";
         }
-        if (text.length() < 5) {
+        if (text.length() < minLength) {
             return "Feedback is too short. Please describe the issue in more detail.";
         }
-        if (text.length() > 2000) {
+        if (text.length() > maxLength) {
             return "Feedback is too long (max 2000 characters). Please shorten it.";
         }
 

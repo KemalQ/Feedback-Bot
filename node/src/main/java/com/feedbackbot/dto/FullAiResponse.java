@@ -17,4 +17,5 @@ public class FullAiResponse {
     private Sentiment sentiment;
     private Integer criticality;
     private String resolution;
+    private boolean isProcessed=false;
 }

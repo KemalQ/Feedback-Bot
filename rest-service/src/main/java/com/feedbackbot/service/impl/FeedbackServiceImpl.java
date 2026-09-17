@@ -5,7 +5,6 @@ import com.feedbackbot.dao.specification.FeedbackSpecifications;
 import com.feedbackbot.dto.feedback.FeedbackFilterRequest;
 import com.feedbackbot.dto.feedback.FeedbackResponseDto;
 import com.feedbackbot.entity.FeedbackMessage;
-import com.feedbackbot.enums.UserRole;
 import com.feedbackbot.exception.FeedbackNotFoundException;
 import com.feedbackbot.mapper.MapperUtils;
 import com.feedbackbot.service.FeedbackService;
@@ -54,6 +53,4 @@ public class FeedbackServiceImpl implements FeedbackService {
     public FeedbackResponseDto markResolved(Long id, String resolution) {
         return null;
     }
-
-
 }

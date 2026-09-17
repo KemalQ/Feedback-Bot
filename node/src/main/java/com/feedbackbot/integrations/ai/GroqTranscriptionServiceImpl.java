@@ -6,13 +6,17 @@ import org.springframework.ai.audio.transcription.AudioTranscriptionResponse;
 import org.springframework.ai.openai.OpenAiAudioTranscriptionModel;
 import org.springframework.ai.openai.OpenAiAudioTranscriptionOptions;
 import org.springframework.ai.openai.api.OpenAiAudioApi;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
-public class GroqTranscriptionServiceImpl implements GroqTranscriptionService{///
+public class GroqTranscriptionServiceImpl implements GroqTranscriptionService{
+    @Value("${AUDIO_TRANSCRIPTION_MODEL}")//AUDIO_TRANSCRIPTION_MODEL
+    private String audioTranscriptionModel;
+
     private final OpenAiAudioTranscriptionModel transcriptionModel;
 
     public GroqTranscriptionServiceImpl(OpenAiAudioTranscriptionModel transcriptionModel) {
@@ -32,7 +36,7 @@ public class GroqTranscriptionServiceImpl implements GroqTranscriptionService{//
         };
         AudioTranscriptionPrompt prompt = new AudioTranscriptionPrompt(audioResource,
                 OpenAiAudioTranscriptionOptions.builder().
-                        model("whisper-large-v3")//.language("en")
+                        model(audioTranscriptionModel)//.language("en")
                         .responseFormat(OpenAiAudioApi.TranscriptResponseFormat.JSON)
                         .build());
 

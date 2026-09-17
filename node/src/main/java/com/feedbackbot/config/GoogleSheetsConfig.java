@@ -6,20 +6,24 @@ import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.SheetsScopes;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.beans.IndexedPropertyChangeEvent;
 import java.io.InputStream;
 import java.util.List;
 
 @Configuration
 public class GoogleSheetsConfig {
+    
+    @Value("${GOOGLE_SHEETS_CREDENTIALS}")
+    private String googleSheetsCredentials;
+    
     @Bean
     public Sheets sheetsService() throws Exception{
         InputStream credentialsStream = getClass()
                 .getClassLoader()
-                .getResourceAsStream("feedbackbot-491514-b35fd13d5dc9.json");
+                .getResourceAsStream(googleSheetsCredentials);
 
         GoogleCredentials credentials = GoogleCredentials
                 .fromStream(credentialsStream)
