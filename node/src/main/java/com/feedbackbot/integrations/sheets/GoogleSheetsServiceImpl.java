@@ -19,7 +19,7 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
     @Value("${google.sheets.spreadsheet-id}")
     private String spreadsheetId;
 
-    @Value("${google.sheets.range:A:G}")
+    @Value("${google.sheets.range:A:H}")
     private String range;
 
     public GoogleSheetsServiceImpl(Sheets sheetsService) {
@@ -27,7 +27,7 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
     }
 
     @Override
-    public void appendFeedbackRow(FeedbackMessage feedback, AppUser user) {
+    public String appendFeedbackRow(FeedbackMessage feedback, AppUser user) {
         try {
             String timestamp = feedback.getCreatedAt() != null
                     ? feedback.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
@@ -45,18 +45,25 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
 
             ValueRange body = new ValueRange().setValues(List.of(row));
 
-            sheetsService.spreadsheets().values()
+            var response = sheetsService.spreadsheets().values()
                     .append(spreadsheetId, range, body)
                     .setValueInputOption("RAW")
                     .setInsertDataOption("INSERT_ROWS")
                     .execute();
 
+            String updateRange = response.getUpdates() != null
+                    ? response.getUpdates().getUpdatedRange()
+                    : null;
+
             log.info("✅ Google Sheets row appended: feedbackId={}, criticality={}",
                     feedback.getId(), feedback.getCriticality());
 
+            return updateRange;
+
         } catch (Exception e) {
             log.error("❌ Failed to append row to Google Sheets: {}", e.getMessage());
-            // don't throw exception — don't block the main flow
+            return null; // don't throw exception — don't block the main flow
         }
+
     }
 }

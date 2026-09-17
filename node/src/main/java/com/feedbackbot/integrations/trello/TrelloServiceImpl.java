@@ -33,9 +33,9 @@ public class TrelloServiceImpl implements TrelloService{
     }
 
     @Override
-    public void createCardIfCritical(FeedbackMessage feedback, AppUser user) {
+    public String createCardIfCritical(FeedbackMessage feedback, AppUser user) {
         if (feedback.getCriticality() == null || feedback.getCriticality() < 4){
-            return;
+            return null;
         }
 
         try{
@@ -45,16 +45,18 @@ public class TrelloServiceImpl implements TrelloService{
 
             String cardId = createCard(title, description);
             if(cardId == null){
-                return;
+                return null;
             }
 
             addLabel(cardId, labelColor, title);
             log.info("Trello card created. cardId: {}, criticality: {}", cardId, feedback.getCriticality());
+            return cardId;
         }
         catch (Exception e){
             log.error("Failed to create card: {}", e.getMessage());
             //TODO: send notification to admin
             /// do not block flow
+            return null;
         }
 
 

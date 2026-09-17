@@ -30,6 +30,10 @@ public class FeedbackProcessingServiceImpl implements FeedbackProcessingService 
     public String process(String feedbackText, AppUser appUser) {
         FullAiResponse aiResponse = springAIAnalysisService.analyze(feedbackText);
 
+        if(!aiResponse.isProcessed()){
+            log.info("AI service didn't processed the message");
+            return "AI service is unavailable. Please connect with admin";
+        }
         if (!aiResponse.isRelevant()) {
             log.info("Non-relevant message from user {}, skipping", appUser.getTelegramUserId());
             return "Please send relevant feedback about your work or workplace conditions.";
@@ -49,10 +53,15 @@ public class FeedbackProcessingServiceImpl implements FeedbackProcessingService 
         log.info("Feedback saved: id={}, criticality={}",
                 feedback.getId(), feedback.getCriticality());
 
-        googleSheetsService.appendFeedbackRow(feedback, appUser);
+        String sheetRowRef = googleSheetsService.appendFeedbackRow(feedback, appUser);
 
-        trelloService.createCardIfCritical(feedback, appUser);
+        String trelloCardId = trelloService.createCardIfCritical(feedback, appUser);
 
+        if(sheetRowRef != null || trelloCardId != null){
+            feedback.setGoogleDocRowId(sheetRowRef);
+            feedback.setTrelloCardId(trelloCardId);
+            feedbackMessageDAO.save(feedback);
+        }
         // response to the user
         return buildUserResponse(aiResponse);
     }

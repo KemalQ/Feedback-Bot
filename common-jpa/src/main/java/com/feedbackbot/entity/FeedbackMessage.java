@@ -53,4 +53,10 @@ public class FeedbackMessage {
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
+
+    @Column(name = "admin_resolution", columnDefinition = "TEXT")
+    private String adminResolution;
+
+    @Column(name = "resolved_at")
+    private LocalDateTime resolvedAt;
 }

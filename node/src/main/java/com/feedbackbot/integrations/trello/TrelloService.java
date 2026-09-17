@@ -5,5 +5,5 @@ import com.feedbackbot.entity.FeedbackMessage;
 
 
 public interface TrelloService {
-    void createCardIfCritical(FeedbackMessage message, AppUser user);
+    String createCardIfCritical(FeedbackMessage message, AppUser user);
 }
