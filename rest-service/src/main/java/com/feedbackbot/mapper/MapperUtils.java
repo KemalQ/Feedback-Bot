@@ -1,8 +1,8 @@
 package com.feedbackbot.mapper;
 
-import com.feedbackbot.dto.feedback.FeedbackResponseDto;
-import com.feedbackbot.dto.token.InviteTokenCreateRequest;
-import com.feedbackbot.dto.token.InviteTokenResponseDto;
+import com.feedbackbot.feedback.dto.FeedbackResponseDto;
+import com.feedbackbot.token.dto.InviteTokenCreateRequest;
+import com.feedbackbot.token.dto.InviteTokenResponseDto;
 import com.feedbackbot.entity.FeedbackMessage;
 import com.feedbackbot.entity.InviteToken;
 import org.mapstruct.Mapper;
