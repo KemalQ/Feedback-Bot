@@ -78,12 +78,13 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<ApiError> handleAutheticationException(
-            AuthenticationException exception, WebRequest request){
+    public ResponseEntity<ApiError> handleAuthenticationException(
+            AuthenticationException exception, WebRequest request) {
         return buildError(
                 HttpStatus.UNAUTHORIZED,
                 "Invalid username or password",
-                request);
+                request
+        );
     }
 
     private ResponseEntity<ApiError> buildError(HttpStatus status, String message, WebRequest request){

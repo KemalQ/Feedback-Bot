@@ -24,7 +24,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.HexFormat;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -45,18 +44,11 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public void registerAdmin(RegisterAdminRequest request) {
-        ensureAdminDoesNotExist(request);
-        AdminUser admin = AdminUser.builder()
-                .username(request.username())
-                .email(request.email())
-                .passwordHash(passwordEncoder.encode(request.password()))
-                .active(true)
-                .build();
-        adminUserDAO.save(admin);
-        log.info("Admin registered: {}", admin.getUsername());
+        createAdmin(request);
     }
 
     @Override
+    @Transactional
     public void bootstrapFirstAdmin(RegisterAdminRequest request, String suppliedBootstrapToken) {
         if (!StringUtils.hasText(bootstrapToken) || !constantTimeEquals(bootstrapToken, suppliedBootstrapToken)){
             throw new InvalidRefreshTokenException("Invalid bootstrap token");
@@ -64,7 +56,7 @@ public class AuthServiceImpl implements AuthService {
         if (adminUserDAO.count() != 0){
             throw new AdminAlreadyExistsException("Initial administrator has already been created");
         }
-        registerAdmin(request); /// TODO
+        createAdmin(request);
     }
 
     @Override
@@ -138,6 +130,18 @@ public class AuthServiceImpl implements AuthService {
         if (adminUserDAO.findByUsername(request.username()).isPresent() || adminUserDAO.existsByEmail(request.email())) {
             throw new AdminAlreadyExistsException("Username or email already taken: " + request.username());
         }
+    }
+
+    private void createAdmin(RegisterAdminRequest request){
+        ensureAdminDoesNotExist(request);
+        AdminUser admin = AdminUser.builder()
+                .username(request.username())
+                .email(request.email())
+                .passwordHash(passwordEncoder.encode(request.password()))
+                .active(true)
+                .build();
+        adminUserDAO.save(admin);
+        log.info("Admin registered: {}", admin.getUsername());
     }
 
     private boolean constantTimeEquals(String expectedBootstrapToken, String suppliedBootstrapToken) {
