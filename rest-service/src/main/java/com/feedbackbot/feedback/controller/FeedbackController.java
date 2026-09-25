@@ -15,7 +15,6 @@ import org.springframework.web.servlet.view.RedirectView;
 @Slf4j
 @RestController
 @RequestMapping("/admin/feedbacks")
-@CrossOrigin(origins = "*")
 public class FeedbackController {
 
     private final FeedbackService feedbackService;

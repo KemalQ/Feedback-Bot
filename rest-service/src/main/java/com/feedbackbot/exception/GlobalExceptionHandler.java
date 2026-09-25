@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import javax.naming.AuthenticationException;
 import java.time.LocalDateTime;
 
 import static java.util.stream.Collectors.joining;
@@ -74,6 +75,15 @@ public class GlobalExceptionHandler {
             InvalidRefreshTokenException exception, WebRequest request){
         log.error("Invalid refresh token: " + exception.getMessage());
         return buildError(HttpStatus.UNAUTHORIZED, exception.getMessage(), request);
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ApiError> handleAutheticationException(
+            AuthenticationException exception, WebRequest request){
+        return buildError(
+                HttpStatus.UNAUTHORIZED,
+                "Invalid username or password",
+                request);
     }
 
     private ResponseEntity<ApiError> buildError(HttpStatus status, String message, WebRequest request){

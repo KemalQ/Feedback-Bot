@@ -34,3 +34,5 @@ build/
 
 *.properties
 !**/test/resources/application.properties
+*.json
+*.env

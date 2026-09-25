@@ -135,8 +135,8 @@ public class AuthServiceImpl implements AuthService {
     }
 
     private void ensureAdminDoesNotExist(RegisterAdminRequest request) {
-        if (adminUserDAO.findByUsername(request.username()).isPresent()) {
-            throw new AdminAlreadyExistsException("Username already taken: " + request.username());
+        if (adminUserDAO.findByUsername(request.username()).isPresent() || adminUserDAO.existsByEmail(request.email())) {
+            throw new AdminAlreadyExistsException("Username or email already taken: " + request.username());
         }
     }
 
