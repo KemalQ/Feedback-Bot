@@ -8,7 +8,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 public class AdminService {
     public static void main(String[] args) {
-
         SpringApplication.run(AdminService.class, args);
     }
 }

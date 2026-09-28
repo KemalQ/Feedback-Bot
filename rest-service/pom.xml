@@ -30,12 +30,6 @@
             <artifactId>jakarta.validation-api</artifactId>
             <version>3.0.2</version> <!-- Use the latest version -->
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.hibernate.validator/hibernate-validator -->
-<!--        <dependency>-->
-<!--            <groupId>org.hibernate.validator</groupId>-->
-<!--            <artifactId>hibernate-validator</artifactId>-->
-<!--            <version>9.0.1.Final</version>-->
-<!--        </dependency>-->
 
         <!-- https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-starter-webmvc-ui -->
         <dependency>
