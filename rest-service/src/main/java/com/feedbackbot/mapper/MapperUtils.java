@@ -7,6 +7,7 @@ import com.feedbackbot.entity.FeedbackMessage;
 import com.feedbackbot.entity.InviteToken;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface MapperUtils {
@@ -20,4 +21,6 @@ public interface MapperUtils {
     InviteToken toInviteToken(InviteTokenCreateRequest inviteTokenDto);
 
     InviteTokenResponseDto toInviteTokenResponseDto(InviteToken savedToken);
+
+    void updateTokenFromRequest(InviteTokenCreateRequest request, @MappingTarget InviteToken token);
 }

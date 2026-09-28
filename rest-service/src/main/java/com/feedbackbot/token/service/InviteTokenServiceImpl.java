@@ -48,4 +48,13 @@ public class InviteTokenServiceImpl implements InviteTokenService {
             log.info("Token in id={} successfully deleted", id);
         }
     }
+
+    @Override
+    public void updateToken(Long id, InviteTokenCreateRequest token) {
+        InviteToken existingToken = inviteTokenDAO.findById(id)
+                .orElseThrow(() -> new InviteTokenNotFoundException("Token not found with id: " + id));
+        inviteTokenMapper.updateTokenFromRequest(token, existingToken);
+        inviteTokenDAO.save(existingToken);
+        log.info("Token in id={} successfully updated", id);
+    }
 }

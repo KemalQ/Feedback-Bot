@@ -17,7 +17,7 @@ import java.net.URI;
 
 @Slf4j
 @RestController
-@RequestMapping("/admin/tokens")
+@RequestMapping("/api/v1/admin/tokens")
 public class TokenController {
 
     private final InviteTokenService inviteTokenService;
@@ -57,6 +57,13 @@ public class TokenController {
         log.info("Creating new invite token: {}", token);
 
         return ResponseEntity.created(location).body(savedToken);
+    }
+
+    @PutMapping("/id")
+    public ResponseEntity<Void> updateToken(@PathVariable Long id, @Valid @RequestBody InviteTokenCreateRequest token){
+        inviteTokenService.updateToken(id, token);
+        log.info("Invite token updated! id: {}", id);
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{id}")

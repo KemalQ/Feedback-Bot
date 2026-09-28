@@ -14,7 +14,7 @@ import org.springframework.web.servlet.view.RedirectView;
 
 @Slf4j
 @RestController
-@RequestMapping("/admin/feedbacks")
+@RequestMapping("/api/v1/admin/feedbacks")
 public class FeedbackController {
 
     private final FeedbackService feedbackService;
