@@ -51,7 +51,7 @@ public class TokenController {
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
-                .buildAndExpand(savedToken.getToken())// or savedToken.getId()
+                .buildAndExpand(savedToken.getId())
                 .toUri();
 
         log.info("Creating new invite token: {}", token);

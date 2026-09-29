@@ -78,7 +78,7 @@ public class AuthServiceImpl implements AuthService {
 
 
     @Override
-    @Transactional
+    @Transactional(noRollbackFor = InvalidRefreshTokenException.class)
     public TokenPairResponse rotateRefreshToken(String rawRefreshToken) {
         RefreshToken stored = refreshTokenDAO.findByTokenHash(hash(rawRefreshToken))
                 .orElseThrow(() -> new InvalidRefreshTokenException("Refresh token not recognized"));

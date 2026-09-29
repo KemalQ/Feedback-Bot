@@ -13,7 +13,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class FeedbackResponseDto {
 
-//  AppUser
+    private Long id;
+
+    //  AppUser
     private String branch;
     private UserRole role;
 
