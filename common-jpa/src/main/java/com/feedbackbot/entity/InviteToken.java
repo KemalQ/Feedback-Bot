@@ -28,8 +28,7 @@ public class InviteToken {
     @Column(name = "expires_at")
     private LocalDateTime expiresAt;
 
-    @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     @Column(nullable = false)

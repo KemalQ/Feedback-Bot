@@ -33,6 +33,10 @@ public class InviteTokenServiceImpl implements InviteTokenService {
         if (token.getCreatedBy() == null) {
             token.setCreatedBy("system");
         }
+        // Set createdAt to current time
+        token.setCreatedAt(java.time.LocalDateTime.now());
+        // Set expiresAt to 3 days from creation
+        token.setExpiresAt(token.getCreatedAt().plusDays(3));
         InviteToken savedToken = inviteTokenDAO.save(inviteTokenMapper.toInviteToken(token));
         log.info("Token successfully saved");
         return inviteTokenMapper.toInviteTokenResponseDto(savedToken);
@@ -53,6 +57,10 @@ public class InviteTokenServiceImpl implements InviteTokenService {
     public void updateToken(Long id, InviteTokenCreateRequest token) {
         InviteToken existingToken = inviteTokenDAO.findById(id)
                 .orElseThrow(() -> new InviteTokenNotFoundException("Token not found with id: " + id));
+        // Update createdAt to current time
+        token.setCreatedAt(java.time.LocalDateTime.now());
+        // Recalculate expiresAt to 3 days from new creation time
+        token.setExpiresAt(token.getCreatedAt().plusDays(3));
         inviteTokenMapper.updateTokenFromRequest(token, existingToken);
         inviteTokenDAO.save(existingToken);
         log.info("Token in id={} successfully updated", id);
