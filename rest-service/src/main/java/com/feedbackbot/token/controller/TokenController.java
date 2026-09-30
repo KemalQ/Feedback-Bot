@@ -59,7 +59,7 @@ public class TokenController {
         return ResponseEntity.created(location).body(savedToken);
     }
 
-    @PutMapping("/id")
+    @PutMapping("/{id}")
     public ResponseEntity<Void> updateToken(@PathVariable Long id, @Valid @RequestBody InviteTokenCreateRequest token){
         inviteTokenService.updateToken(id, token);
         log.info("Invite token updated! id: {}", id);
@@ -72,8 +72,4 @@ public class TokenController {
         log.info("Invite Token deleted! id = {}", id);
         return ResponseEntity.noContent().build();
     }
-
-
-
-
 }
